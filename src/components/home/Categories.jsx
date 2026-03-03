@@ -4,6 +4,7 @@ import { useGetCategoryListQuery } from "../../service/api";
 
 const Categories = () => {
   const {data} = useGetCategoryListQuery()
+  console.log(data);
 
   const category = [
     {

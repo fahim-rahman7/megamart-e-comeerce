@@ -11,7 +11,7 @@ const BestDeal = () => {
         <div className='container'>
             <div className=' flex justify-between pb-4 border-b border-primary/20 relative after:absolute after:w-100 after:rounded-full after:bottom-0 after:left-0 after:h-1 after:bg-brand'>
                 <h2 className='heading'>Grab the best deal on <span>Smartphones</span></h2>
-                <Link>View All</Link>
+                <Link to={`/shop?category=smartphones`}>View All</Link>
             </div>
             <div className='mt-10 grid grid-cols-2 md:grid-cols-6 gap-4'>
               {
