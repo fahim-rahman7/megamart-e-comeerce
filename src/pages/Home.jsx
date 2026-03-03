@@ -1,5 +1,5 @@
 import React from "react";
-import Banner from "../components/home/banner";
+import Banner from "../components/home/Banner";
 import BestDeal from "../components/home/BestDeal";
 import Categories from "../components/home/Categories";
 import TopElectronics from "../components/home/TopElectronics";
