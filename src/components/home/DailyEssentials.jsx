@@ -49,7 +49,7 @@ const DailyEssentials = () => {
           </h2>
           <Link to={`/shop?category=kitchen-accessories`}>View All</Link>
         </div>
-        <Link className="mt-15 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-8 gap-4">
+        <div className="mt-15 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-8 gap-4">
           {data?.products.map((item) => (
             <Link to={`/shop/${item.id}`} key={item.id} className="flex flex-col items-center gap-2">
               <div className="w-32 h-32 bg-primary/10 rounded-2xl flex justify-center items-center border border-transparent hover:border-brand hover:shadow-2xl">
@@ -63,7 +63,7 @@ const DailyEssentials = () => {
               <h4 className="text-xl font-bold text-[#222222]">UP to 50% OFF</h4>
             </Link>
           ))}
-        </Link>
+        </div>
       </div>
     </section>
   );
