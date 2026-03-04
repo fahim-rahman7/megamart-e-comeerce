@@ -184,12 +184,11 @@ const Navbar = () => {
           isOpen ? "opacity-100 visible" : "opacity-0 invisible"
         } transition fixed top-0 left-0 z-50 w-full h-screen bg-primary/40`}
       >
-        <div
-          // ref={navRef}
-          className={`w-4/5 sm:3/5 bg-theme h-full ${
-            isOpen ? "translate-x-0 " : "-translate-x-full"
-          } transition-all `}
-        >
+    <div
+  className={`w-4/5 sm:3/5 bg-theme h-full overflow-y-auto ${
+    isOpen ? "translate-x-0" : "-translate-x-full"
+  } transition-all`}
+>
           <div className="flex justify-between items-center mb-5 bg-black p-2">
             <h3 className="font-semibold text-theme">Menu SideBar</h3>
             <button onClick={() => setIsOpen(false)}>
@@ -197,7 +196,7 @@ const Navbar = () => {
             </button>
           </div>
           <ul className="space-y-4 pb-5 border-b border-primary/50 px-5">
-            {data?.slice(0, 20).map((item) => (
+            {data?.slice(0, 30).map((item) => (
               <li key={item} className="text-sm font-bold text-primary">
                 <div className="flex items-center justify-between ">
                   <Link
