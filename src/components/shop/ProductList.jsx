@@ -39,7 +39,7 @@ const ProductList = () => {
         {isLoading ? (
           <Loading />
         ) : (
-          <div className="grid grid-cols-6 gap-5 mt-10">
+          <div className="grid  grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 mt-10">
             {data?.products.map((item) => (
               <ProductCard key={item.id} data={item}/>
             ))}

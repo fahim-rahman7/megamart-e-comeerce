@@ -13,7 +13,7 @@ const BestDeal = () => {
                 <h2 className='heading'>Grab the best deal on <span>Smartphones</span></h2>
                 <Link to={`/shop?category=smartphones`}>View All</Link>
             </div>
-            <div className='mt-10 grid grid-cols-2 md:grid-cols-6 gap-4'>
+            <div className='mt-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4'>
               {
                 data?.products.map((item)=>(
                   <ProductCard key={item.id} data={item}/>
