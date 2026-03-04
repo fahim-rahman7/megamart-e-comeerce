@@ -10,12 +10,10 @@ import {
 import { Link } from "react-router";
 import { useGetCategoryListQuery } from "../../service/api";
 
-
-
 const Navbar = () => {
   const [openDropDown, setOpenDropDown] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const {data} = useGetCategoryListQuery()
+  const { data } = useGetCategoryListQuery();
   // const navRef = useRef(null);
   const category = [
     {
@@ -91,10 +89,10 @@ const Navbar = () => {
       ],
     },
   ];
-//  console.log(navRef);
-//   document.addEventListener("click", (e)=>{
-//     console.log(navRef.current.contains(e.target));
-//   });
+  //  console.log(navRef);
+  //   document.addEventListener("click", (e)=>{
+  //     console.log(navRef.current.contains(e.target));
+  //   });
 
   return (
     <header>
@@ -151,7 +149,7 @@ const Navbar = () => {
       </nav>
       <div className="hidden md:block">
         <div className="container flex pb-2 border-b border-primary/20 mb-5">
-          {data?.slice(0,10).map((item) => (
+          {data?.slice(0, 10).map((item) => (
             <div key={item} className="relative group">
               <Link
                 to={`/shop?category=${item}`}
@@ -184,7 +182,7 @@ const Navbar = () => {
       <div
         className={`${
           isOpen ? "opacity-100 visible" : "opacity-0 invisible"
-        } transition fixed top-0 left-0 w-full h-screen bg-primary/40`}
+        } transition fixed top-0 left-0 z-50 w-full h-screen bg-primary/40`}
       >
         <div
           // ref={navRef}
@@ -199,18 +197,20 @@ const Navbar = () => {
             </button>
           </div>
           <ul className="space-y-4 pb-5 border-b border-primary/50 px-5">
-            {data?.map((item) => (
+            {data?.slice(0, 20).map((item) => (
               <li key={item} className="text-sm font-bold text-primary">
                 <div className="flex items-center justify-between ">
-                  <Link>{item.title}</Link>
-                  <button onClick={() => setOpenDropDown(item)}>
-                    <FaChevronRight />
-                  </button>
+                  <Link
+                    to={`/shop?category=${item}`}
+                    onClick={() => setIsOpen(false)}
+                    className="capitalize"
+                  >
+                    {item}
+                  </Link>
+
                 </div>
                 <div
-                  className={`${
-                    openDropDown === item.title ? "block" : "hidden"
-                  }`}
+                  className={`${openDropDown === item ? "block" : "hidden"}`}
                 >
                   {/* <ul>
                     {item.children.map((child) => (
