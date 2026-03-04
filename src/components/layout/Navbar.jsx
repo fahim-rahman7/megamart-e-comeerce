@@ -227,7 +227,7 @@ const Navbar = () => {
           </ul>
 
           <div className="mt-5">
-            <Link className="text-sm font-bold text-primary px-5" to="/login">
+            <Link onClick={() => setIsOpen(false)} className="text-sm font-bold text-primary px-5" to="/login">
               Sign Up/Sign In
             </Link>
           </div>
