@@ -226,8 +226,8 @@ const Navbar = () => {
             ))}
           </ul>
 
-          <div className="mt-5">
-            <Link onClick={() => setIsOpen(false)} className="text-sm font-bold text-primary px-5" to="/login">
+          <div className="mt-5"> 
+            <Link onClick={() => setIsOpen(false)} className="text-sm font-bold text-primary px-5 py-6" to="/login">
               Sign Up/Sign In
             </Link>
           </div>
