@@ -14,6 +14,9 @@ export const API = createApi({
       getCategoryList: build.query({
         query: () => `/products/category-list`,
       }),
+      getCart: build.query({
+        query: () => `/carts`,
+      }),
 
       getProfile: build.query({
         query: () => ({
@@ -34,4 +37,4 @@ export const API = createApi({
     }),
   })
 
-  export const  { useGetProductsQuery, useGetProductDetailsQuery, useGetCategoryListQuery, useLoginMutation , useGetProfileQuery} = API 
+  export const  { useGetProductsQuery, useGetProductDetailsQuery, useGetCategoryListQuery, useLoginMutation , useGetProfileQuery, useGetCartQuery} = API 

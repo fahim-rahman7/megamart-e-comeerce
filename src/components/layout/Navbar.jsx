@@ -117,7 +117,7 @@ const Navbar = () => {
               />
             </div>
             <div className="flex gap-10">
-              <div className="text-base text-primary hidden md:flex items-center gap-1.5 font-bold">
+              <div className="text-base text-primary hidden md:flex  whitespace-nowrap items-center gap-1.5 font-bold">
                 <FaRegUser className="text-brand text-xl" />
                 <Link
                   className=" relative after:absolute after:h-full after:w-0.5 after:bg-primary/40 after:top-0 after:-right-5"
