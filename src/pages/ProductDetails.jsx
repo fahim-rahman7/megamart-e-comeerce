@@ -3,6 +3,7 @@ import Slider from "react-slick";
 import { useGetProductDetailsQuery } from "../service/api";
 import { useParams } from "react-router";
 import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ProductDetails = () => {
   const sliderRef1 = useRef(null);
@@ -12,6 +13,7 @@ const ProductDetails = () => {
   const { data, isLoading } = useGetProductDetailsQuery({ id });
 
   const [quantity, setQuantity] = useState(1);
+  const [zoomStyle, setZoomStyle] = useState({});
 
   const increaseQty = () => {
     if (quantity < data?.stock) {
@@ -25,7 +27,28 @@ const ProductDetails = () => {
     }
   };
 
-  if (isLoading) return <p className="text-center py-20">Loading...</p>;
+  const handleAddToCart = () => {
+    toast.success(`${quantity} item added to cart`);
+  };
+
+  const handleMouseMove = (e) => {
+    const { left, top, width, height } =
+      e.currentTarget.getBoundingClientRect();
+
+    const x = ((e.pageX - left) / width) * 100;
+    const y = ((e.pageY - top) / height) * 100;
+
+    setZoomStyle({
+      transformOrigin: `${x}% ${y}%`,
+      transform: "scale(2)",
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setZoomStyle({
+      transform: "scale(1)",
+    });
+  };
 
   const settings = {
     dots: false,
@@ -33,25 +56,17 @@ const ProductDetails = () => {
     accessibility: false,
   };
 
-  const handleAddToCart = () => {
-    toast.success("Added to cart");
-  };
-
   return (
-    <section className="py-20">
-      <ToastContainer position="top-right" autoClose={2000} />
+    <section>
       <div className="container">
-
+        <ToastContainer/>
         {/* ===== TOP SECTION ===== */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-
           {/* ===== IMAGE SECTION ===== */}
           <div>
-
             {/* MAIN IMAGE */}
             {data?.images?.length > 0 && (
-              <div className="bg-primary/10 rounded-3xl border border-primary/20 mb-6 h-[420px] overflow-hidden flex items-center justify-center">
-
+              <div className="bg-primary/10 rounded-3xl border border-primary/20 mb-6 h-[420px] p-10 flex items-center justify-center overflow-hidden">
                 <Slider
                   {...settings}
                   asNavFor={sliderRef2.current}
@@ -59,19 +74,22 @@ const ProductDetails = () => {
                   className="w-full"
                 >
                   {data.images.map((img) => (
-                    <div
-                      key={img}
-                      className="h-[420px] flex items-center justify-center"
-                    >
-                      <img
-                        src={img}
-                        alt={data.title}
-                        className="h-full w-full object-contain"
-                      />
+                    <div key={img}>
+                      <div
+                        className="h-[360px] flex items-center justify-center cursor-zoom-in overflow-hidden"
+                        onMouseMove={handleMouseMove}
+                        onMouseLeave={handleMouseLeave}
+                      >
+                        <img
+                          src={img}
+                          alt={data.title}
+                          style={zoomStyle}
+                          className="max-h-full max-w-full object-contain transition-transform duration-200"
+                        />
+                      </div>
                     </div>
                   ))}
                 </Slider>
-
               </div>
             )}
 
@@ -81,7 +99,7 @@ const ProductDetails = () => {
                 {...settings}
                 asNavFor={sliderRef1.current}
                 ref={sliderRef2}
-                slidesToShow={3}
+                slidesToShow={4}
                 swipeToSlide
                 focusOnSelect
               >
@@ -91,24 +109,22 @@ const ProductDetails = () => {
                       <img
                         src={img}
                         alt="thumb"
-                        className="h-full object-contain"
+                        className="max-h-full max-w-full object-contain"
                       />
                     </div>
                   </div>
                 ))}
               </Slider>
             )}
-
           </div>
 
           {/* ===== PRODUCT INFO ===== */}
           <div className="lg:col-span-2">
-
             <h1 className="text-3xl font-semibold">{data?.title}</h1>
 
             <p className="text-gray-500 mt-2">
-              Brand:{" "}
-              <span className="text-gray-900 font-medium">
+              Brand:
+              <span className="text-gray-900 font-medium ml-1">
                 {data?.brand}
               </span>
             </p>
@@ -128,8 +144,8 @@ const ProductDetails = () => {
 
             {/* AVAILABILITY */}
             <p className="mt-3">
-              Availability:{" "}
-              <span className="font-medium text-green-600">
+              Availability:
+              <span className="font-medium text-green-600 ml-1">
                 {data?.availabilityStatus}
               </span>
             </p>
@@ -139,14 +155,12 @@ const ProductDetails = () => {
             </p>
 
             <p className="mt-1 text-sm">
-              SKU:{" "}
-              <span className="text-gray-600">
-                {data?.sku}
-              </span>
+              SKU:
+              <span className="text-gray-600 ml-1">{data?.sku}</span>
             </p>
 
             {/* TAGS */}
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-2 mt-4 flex-wrap">
               {data?.tags?.map((tag) => (
                 <span
                   key={tag}
@@ -164,13 +178,9 @@ const ProductDetails = () => {
 
             {/* ===== QUANTITY SELECTOR ===== */}
             <div className="mt-6">
-
-              <p className="text-sm font-medium mb-2">
-                Select Quantity:
-              </p>
+              <p className="text-sm font-medium mb-2">Select Quantity:</p>
 
               <div className="inline-flex items-center gap-4 bg-gray-100 rounded-full px-4 py-2">
-
                 <button
                   onClick={decreaseQty}
                   disabled={quantity <= 1}
@@ -179,9 +189,7 @@ const ProductDetails = () => {
                   −
                 </button>
 
-                <span className="w-6 text-center font-medium">
-                  {quantity}
-                </span>
+                <span className="w-6 text-center font-medium">{quantity}</span>
 
                 <button
                   onClick={increaseQty}
@@ -190,79 +198,55 @@ const ProductDetails = () => {
                 >
                   +
                 </button>
-
               </div>
-
             </div>
 
             {/* ADD TO CART */}
-            <button onClick={handleAddToCart} className="mt-6 px-8 py-3 cursor-pointer bg-orange-500 text-white rounded-xl hover:bg-orange-400 transition">
+            <button
+              onClick={handleAddToCart}
+              className="mt-6 px-8 py-3 cursor-pointer bg-orange-500 text-white rounded-xl hover:bg-orange-400 transition"
+            >
               Add to Cart
             </button>
-
           </div>
         </div>
 
         {/* ===== EXTRA INFORMATION ===== */}
         <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
-
           <div className="border rounded-2xl p-6">
-            <h3 className="text-xl font-semibold mb-3">
-              Shipping Information
-            </h3>
+            <h3 className="text-xl font-semibold mb-3">Shipping Information</h3>
             <p>{data?.shippingInformation}</p>
           </div>
 
           <div className="border rounded-2xl p-6">
-            <h3 className="text-xl font-semibold mb-3">
-              Warranty
-            </h3>
+            <h3 className="text-xl font-semibold mb-3">Warranty</h3>
             <p>{data?.warrantyInformation}</p>
           </div>
 
           <div className="border rounded-2xl p-6">
-            <h3 className="text-xl font-semibold mb-3">
-              Return Policy
-            </h3>
+            <h3 className="text-xl font-semibold mb-3">Return Policy</h3>
             <p>{data?.returnPolicy}</p>
           </div>
-
         </div>
 
         {/* ===== REVIEWS ===== */}
         <div className="mt-16">
-
-          <h2 className="text-2xl font-semibold mb-6">
-            Customer Reviews
-          </h2>
+          <h2 className="text-2xl font-semibold mb-6">Customer Reviews</h2>
 
           <div className="space-y-4">
-
             {data?.reviews?.map((review, index) => (
               <div key={index} className="border rounded-xl p-4">
+                <p className="font-medium">{review.reviewerName}</p>
 
-                <p className="font-medium">
-                  {review.reviewerName}
-                </p>
+                <p className="text-sm text-gray-500">⭐ {review.rating} / 5</p>
 
-                <p className="text-sm text-gray-500">
-                  ⭐ {review.rating} / 5
-                </p>
-
-                <p className="mt-2">
-                  {review.comment}
-                </p>
-
+                <p className="mt-2">{review.comment}</p>
               </div>
             ))}
-
           </div>
-
         </div>
-
       </div>
     </section>
   );
 };
-
 export default ProductDetails;
