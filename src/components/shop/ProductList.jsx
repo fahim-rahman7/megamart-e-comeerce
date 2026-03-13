@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from "react"; 
 import ProductCard from "../ui/ProductCard";
 import { useGetProductsQuery } from "../../service/api";
 import Loading from "../ui/Loading";
@@ -15,53 +15,53 @@ const ProductList = () => {
   const { data, isLoading } = useGetProductsQuery({ limit, skip, category });
 
   return (
-    <section className="py-120">
-      <div className="container">
+    <section className="py-20">
+      <div className="container mx-auto px-4">
 
-        <div className="grid grid-cols-12 gap-10">
+        {/* Grid: Sidebar visible on md and above */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 
-          {/* Sidebar */}
-          <div className="col-span-3">
+          {/* Sidebar: hidden on sm, visible on md+ */}
+          <div className="hidden md:block md:col-span-1">
             <ShopSidebar />
           </div>
 
-          {/* Products */}
-          <div className="col-span-9">
+          {/* Products: full width on sm, right of sidebar on md+ */}
+          <div className="md:col-span-3">
 
-            <div className="flex justify-between items-center">
-              <h4 className="font-semibold text-xl text-primary">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center font-semibold text-sm lg:text-xl text-primary gap-4">
+              <h4>
                 Showing <span className="font-bold">({limit} Items)</span>
               </h4>
 
               <div className="flex gap-5 items-center">
-                <p className="font-semibold text-xl text-primary">
-                  Displaying {skip + 1}-{limit} of {data?.total} Products
+                <p className="font-semibold">
+                  Displaying {skip + 1}-{limit} of {data?.total || 0} Products
                 </p>
 
                 <select
-                  onChange={(e) => setLimit(e.target.value)}
-                  className="border rounded-2xl px-4 py-2 font-semibold text-xl text-primary"
+                  onChange={(e) => setLimit(Number(e.target.value))}
+                  className="border rounded-2xl px-2 py-1 lg:px-4 lg:py-2"
                 >
-                  <option value="30">30</option>
-                  <option value="60">60</option>
-                  <option value="90">90</option>
-                  <option value="120">120</option>
-                  <option value="150">150</option>
-                  <option value="180">180</option>
-                  <option value="210">210</option>
+                  {[30, 60, 90, 120, 150, 180, 210].map((num) => (
+                    <option key={num} value={num}>{num}</option>
+                  ))}
                 </select>
               </div>
             </div>
 
+            {/* Products Grid */}
             {isLoading ? (
               <Loading />
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mt-10">
-                {data?.products.map((item) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
+                {data?.products?.map((item) => (
                   <ProductCard key={item.id} data={item} />
                 ))}
               </div>
             )}
+
           </div>
         </div>
       </div>

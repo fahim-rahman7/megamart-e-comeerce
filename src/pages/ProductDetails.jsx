@@ -76,7 +76,7 @@ const ProductDetails = () => {
                   {data.images.map((img) => (
                     <div key={img}>
                       <div
-                        className="h-[360px] flex items-center justify-center cursor-zoom-in overflow-hidden"
+                        className="h-90 flex items-center justify-center cursor-zoom-in overflow-hidden"
                         onMouseMove={handleMouseMove}
                         onMouseLeave={handleMouseLeave}
                       >
