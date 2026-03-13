@@ -25,7 +25,7 @@ const TopElectronics = () => {
           <h2 className="heading">
             Top<span> Electronics Brands </span>
           </h2>
-          <Link>View All</Link>
+          <Link to={"/shop"}>View All</Link>
         </div>
         <div className="slider-container mt-15">
           <Slider {...settings}>

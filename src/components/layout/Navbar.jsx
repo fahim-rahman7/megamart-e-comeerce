@@ -9,12 +9,20 @@ import {
 } from "react-icons/fa";
 import { Link } from "react-router";
 import { useGetCategoryListQuery } from "../../service/api";
+import { useGetProfileQuery } from "../../service/api";
+import { getCookie } from "../utils/cookie";
 
 const Navbar = () => {
   const [openDropDown, setOpenDropDown] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const { data } = useGetCategoryListQuery();
   // const navRef = useRef(null);
+
+  const token = getCookie();
+  const { data: profile } = useGetProfileQuery(undefined, {
+    skip: !token, // don't call API if user not logged in
+  });
+
   const category = [
     {
       title: "Phone",
@@ -117,14 +125,26 @@ const Navbar = () => {
               />
             </div>
             <div className="flex gap-10">
-              <div className="text-base text-primary hidden md:flex  whitespace-nowrap items-center gap-1.5 font-bold">
-                <FaRegUser className="text-brand text-xl" />
-                <Link
-                  className=" relative after:absolute after:h-full after:w-0.5 after:bg-primary/40 after:top-0 after:-right-5"
-                  to="/login"
-                >
-                  Sign Up/Sign In
-                </Link>
+              <div className="text-base text-primary hidden md:flex whitespace-nowrap items-center gap-1.5 font-bold">
+                {profile ? (
+                  <Link to="/profile">
+                    <img
+                      src={profile.image}
+                      alt="profile"
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  </Link>
+                ) : (
+                  <>
+                    <FaRegUser className="text-brand text-xl" />
+                    <Link
+                      className="relative after:absolute after:h-full after:w-0.5 after:bg-primary/40 after:top-0 after:-right-5"
+                      to="/login"
+                    >
+                      Sign Up/Sign In
+                    </Link>
+                  </>
+                )}
               </div>
               <div className="text-base text-primary flex items-center gap-1.5 font-bold">
                 <CiShoppingCart className="text-brand text-xl" />
@@ -182,13 +202,13 @@ const Navbar = () => {
       <div
         className={`${
           isOpen ? "opacity-100 visible" : "opacity-0 invisible"
-        } transition fixed top-0 left-0 z-50 w-full h-screen bg-primary/40`}
+        } transition fixed top-0 left-0 z-[999] w-full h-screen bg-primary/40`}
       >
-    <div
-  className={`w-4/5 sm:3/5 bg-theme h-full overflow-y-auto ${
-    isOpen ? "translate-x-0" : "-translate-x-full"
-  } transition-all`}
->
+        <div
+          className={`w-4/5 sm:3/5 bg-theme h-full overflow-y-auto ${
+            isOpen ? "translate-x-0" : "-translate-x-full"
+          } transition-all`}
+        >
           <div className="flex justify-between items-center mb-5 bg-black p-2">
             <h3 className="font-semibold text-theme">Menu SideBar</h3>
             <button onClick={() => setIsOpen(false)}>
@@ -206,7 +226,6 @@ const Navbar = () => {
                   >
                     {item}
                   </Link>
-
                 </div>
                 <div
                   className={`${openDropDown === item ? "block" : "hidden"}`}
@@ -226,10 +245,29 @@ const Navbar = () => {
             ))}
           </ul>
 
-          <div className="mt-5"> 
-            <Link onClick={() => setIsOpen(false)} className="text-lg font-bold px-5 py-6" to="/login">
-              Sign Up/Sign In
-            </Link>
+          <div className="mt-5">
+            {profile ? (
+              <Link
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 px-5 py-6"
+                to="/profile"
+              >
+                <img
+                  src={profile.image}
+                  alt="profile"
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+                <span className="font-bold">{profile.firstName}</span>
+              </Link>
+            ) : (
+              <Link
+                onClick={() => setIsOpen(false)}
+                className="text-lg font-bold px-5 py-6"
+                to="/login"
+              >
+                Sign Up/Sign In
+              </Link>
+            )}
           </div>
         </div>
       </div>

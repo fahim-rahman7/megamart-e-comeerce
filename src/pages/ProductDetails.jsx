@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import Slider from "react-slick";
 import { useGetProductDetailsQuery } from "../service/api";
 import { useParams } from "react-router";
+import { ToastContainer, toast } from "react-toastify";
 
 const ProductDetails = () => {
   const sliderRef1 = useRef(null);
@@ -32,8 +33,13 @@ const ProductDetails = () => {
     accessibility: false,
   };
 
+  const handleAddToCart = () => {
+    toast.success("Added to cart");
+  };
+
   return (
     <section className="py-20">
+      <ToastContainer position="top-right" autoClose={2000} />
       <div className="container">
 
         {/* ===== TOP SECTION ===== */}
@@ -190,7 +196,7 @@ const ProductDetails = () => {
             </div>
 
             {/* ADD TO CART */}
-            <button className="mt-6 px-8 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-400 transition">
+            <button onClick={handleAddToCart} className="mt-6 px-8 py-3 cursor-pointer bg-orange-500 text-white rounded-xl hover:bg-orange-400 transition">
               Add to Cart
             </button>
 
