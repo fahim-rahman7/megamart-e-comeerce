@@ -3,7 +3,7 @@ import { useGetCartQuery } from "../service/api";
 
 const Cart = () => {
   const { data, isLoading } = useGetCartQuery();
-
+console.log(data);
   if (isLoading) {
     return (
       <div className="text-center py-20 text-lg font-medium">
@@ -12,26 +12,28 @@ const Cart = () => {
     );
   }
 
-  const cart = data?.carts?.[0]; // using first cart
+  // combine all products from carts and limit to 20
+  const products =
+    data?.carts?.flatMap((cart) => cart.products).slice(0, 10);
 
   return (
     <section className="py-16">
-      <div className="container">
+      <div className="container mx-auto">
 
         {/* PAGE TITLE */}
         <h1 className="text-3xl font-semibold mb-10">
           Shopping Cart
         </h1>
 
-        {/* CART ITEMS */}
-        <div className="grid gap-6">
+        {/* PRODUCTS */}
+        <div className="space-y-6">
 
-          {cart?.products?.map((product) => (
+          {products?.map((product) => (
             <div
               key={product.id}
-              className="flex items-center justify-between border rounded-xl p-4 shadow-sm"
+              className="flex items-center justify-between border rounded-xl p-5 shadow-sm"
             >
-              {/* PRODUCT INFO */}
+              {/* LEFT SIDE */}
               <div className="flex items-center gap-4">
 
                 <img
@@ -41,7 +43,7 @@ const Cart = () => {
                 />
 
                 <div>
-                  <h2 className="font-semibold text-lg">
+                  <h2 className="text-lg font-semibold">
                     {product.title}
                   </h2>
 
@@ -53,39 +55,46 @@ const Cart = () => {
                     Discount: {product.discountPercentage}%
                   </p>
                 </div>
+
               </div>
 
               {/* QUANTITY */}
               <div className="text-center">
-                <p className="text-sm text-gray-500">Quantity</p>
-                <p className="font-medium">{product.quantity}</p>
+                <p className="text-gray-500 text-sm">
+                  Quantity
+                </p>
+
+                <p className="font-medium text-lg">
+                  {product.quantity}
+                </p>
               </div>
 
               {/* TOTAL */}
               <div className="text-right">
-                <p className="text-sm text-gray-500">
+
+                <p className="text-gray-500 text-sm">
                   Total
                 </p>
 
-                <p className="font-semibold">
+                <p className="font-semibold text-lg">
                   ${product.discountedTotal}
                 </p>
 
-                <p className="text-xs text-gray-400 line-through">
+                <p className="text-gray-400 text-sm line-through">
                   ${product.total}
                 </p>
+
               </div>
 
-              {/* REMOVE BUTTON */}
-              <button className="text-red-500 font-medium hover:text-red-700">
-                Remove
-              </button>
+
+
             </div>
           ))}
+
         </div>
 
         {/* CART SUMMARY */}
-        <div className="mt-12 border rounded-xl p-6 w-full md:w-[350px] ml-auto">
+        <div className="mt-12 max-w-sm ml-auto border rounded-xl p-6">
 
           <h3 className="text-xl font-semibold mb-4">
             Cart Summary
@@ -93,22 +102,17 @@ const Cart = () => {
 
           <div className="flex justify-between mb-2">
             <span>Total Products</span>
-            <span>{cart?.totalProducts}</span>
-          </div>
-
-          <div className="flex justify-between mb-2">
-            <span>Total Quantity</span>
-            <span>{cart?.totalQuantity}</span>
-          </div>
-
-          <div className="flex justify-between mb-2">
-            <span>Total Price</span>
-            <span>${cart?.total}</span>
+            <span>{products?.length}</span>
           </div>
 
           <div className="flex justify-between text-lg font-semibold mt-4">
-            <span>Discounted Total</span>
-            <span>${cart?.discountedTotal}</span>
+            <span>Estimated Total</span>
+            <span>
+              $
+              {products
+                ?.reduce((sum, item) => sum + item.discountedTotal, 0)
+                .toFixed(2)}
+            </span>
           </div>
 
           <button className="w-full mt-6 bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-400 transition">
