@@ -21,7 +21,6 @@ const Navbar = () => {
   const token = getCookie();
   const { data: profile } = useGetProfileQuery(undefined, {
     skip: !token, // don't call API if user not logged in
-    
   });
 
   const category = [
@@ -147,9 +146,9 @@ const Navbar = () => {
                   </>
                 )}
               </div>
-              <div className="text-base text-primary flex items-center gap-1.5 font-bold">
-                <CiShoppingCart className="text-brand text-xl" />
-                <Link to="/cart">
+              <div className="text-base text-primary font-bold">
+                <Link to="/cart" className="flex items-center gap-1.5 ">
+                  <CiShoppingCart className="text-brand text-xl" />
                   <span className="hidden md:block">Cart</span>
                 </Link>
               </div>
