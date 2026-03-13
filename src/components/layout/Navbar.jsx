@@ -21,6 +21,7 @@ const Navbar = () => {
   const token = getCookie();
   const { data: profile } = useGetProfileQuery(undefined, {
     skip: !token, // don't call API if user not logged in
+    
   });
 
   const category = [

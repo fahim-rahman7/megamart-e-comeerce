@@ -13,6 +13,7 @@ const LogIn = () => {
     password: ""
   })
   const navigate = useNavigate();
+
   const HandleSubmit = async(e) => {
     e.preventDefault();
     try {
@@ -22,6 +23,7 @@ const LogIn = () => {
       }
        document.cookie = `accessToken=${res.data.accessToken}`
        navigate("/profile")
+       window.location.reload();
       console.log(res);
     } catch (error) {
       
