@@ -10,6 +10,9 @@ const Banner = () => {
     speed: 500,
     slidesToShow: 1,
     slidesToScroll: 1,
+    autoplay: true,        // ✅ enable auto slide
+    autoplaySpeed: 2500,   // ⏱ 2 seconds
+    pauseOnHover: true,    // 🛑 pause when hover
     nextArrow: <NextArrow />,
     prevArrow: <PrevArrow />,
     appendDots: (dots) => (

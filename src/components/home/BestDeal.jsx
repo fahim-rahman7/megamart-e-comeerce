@@ -15,7 +15,7 @@ const BestDeal = () => {
             </div>
             <div className='mt-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4'>
               {
-                data?.products.map((item)=>(
+                data?.products.slice(0,5).map((item)=>(
                   <ProductCard key={item.id} data={item}/>
                 ))
               }

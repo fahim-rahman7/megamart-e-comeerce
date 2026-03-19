@@ -7,17 +7,19 @@ import {
   FaRegUser,
   FaWindowClose,
 } from "react-icons/fa";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useGetCategoryListQuery } from "../../service/api";
 import { useGetProfileQuery } from "../../service/api";
 import { getCookie } from "../utils/cookie";
 
 const Navbar = () => {
   const [openDropDown, setOpenDropDown] = useState("");
+  const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const { data } = useGetCategoryListQuery();
   // const navRef = useRef(null);
 
+  const navigate = useNavigate();
   const token = getCookie();
   const { data: profile } = useGetProfileQuery(undefined, {
     skip: !token, // don't call API if user not logged in
@@ -122,6 +124,13 @@ const Navbar = () => {
                 className="text-primary w-full text-base outline-0"
                 type="text"
                 placeholder="Search essentials, groceries and more..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    navigate(`/shop?category=${search}`);
+                  }
+                }}
               />
             </div>
             <div className="flex gap-10">

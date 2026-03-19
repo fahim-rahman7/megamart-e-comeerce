@@ -9,14 +9,21 @@ const TopElectronics = () => {
     infinite: true,
     speed: 500,
     slidesToShow: 3,
-    slidesToScroll: 3,
+    slidesToScroll: 1,
     arrows: false,
+  
+    autoplay: true,        // ✅ enable auto slide
+    autoplaySpeed: 2000,   // ⏱ 2 seconds
+    pauseOnHover: true,    // 🛑 pause when hover
+  
     appendDots: (dots) => (
       <div>
         <ul className="flex gap-2 justify-center mt-5"> {dots} </ul>
       </div>
     ),
-    customPaging: (i) => <div className="bg-slate-400 w-2 h-2 md:w-3 md:h-3 rounded-full"></div>,
+    customPaging: (i) => (
+      <div className="bg-slate-400 w-2 h-2 md:w-3 md:h-3 rounded-full"></div>
+    ),
   };
   return (
     <section className=" pb-32">
