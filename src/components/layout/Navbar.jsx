@@ -3,7 +3,6 @@ import { BiChevronDown } from "react-icons/bi";
 import { CiSearch, CiShoppingCart } from "react-icons/ci";
 import {
   FaBars,
-  FaChevronRight,
   FaRegUser,
   FaWindowClose,
 } from "react-icons/fa";
