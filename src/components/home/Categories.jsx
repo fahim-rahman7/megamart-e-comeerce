@@ -1,9 +1,10 @@
-import React from "react";
-import { Link } from "react-router"; // or "react-router-dom"
+import React, { useState } from "react";
+import { Link } from "react-router";
 import { useGetCategoryListQuery } from "../../service/api";
 
 const Categories = () => {
   const { data, isLoading } = useGetCategoryListQuery();
+  const [showAll, setShowAll] = useState(false);
 
   // Handle both array of objects (custom backend) or array of strings (fallback)
   const categories = Array.isArray(data) ? data : data?.categories || [];
@@ -14,6 +15,9 @@ const Categories = () => {
     return slug !== "daily-essentials"; 
   });
 
+  // Determine which categories to display based on state
+  const displayedCategories = showAll ? filteredCategories : filteredCategories.slice(0, 8);
+
   return (
     <section className="pb-32">
       <div className="container mx-auto px-4">
@@ -21,9 +25,12 @@ const Categories = () => {
           <h2 className="heading">
             Shop From <span> Top Categories</span>
           </h2>
-          <Link to={"/shop"} className="hover:text-brand font-medium transition">
-            View All
-          </Link>
+          <button 
+            onClick={() => setShowAll(!showAll)} 
+            className="hover:text-brand font-medium transition cursor-pointer"
+          >
+            {showAll ? "Show Less" : "View All"}
+          </button>
         </div>
 
         {isLoading ? (
@@ -32,8 +39,7 @@ const Categories = () => {
           </div>
         ) : (
           <div className="mt-15 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
-            {/* Map over the filtered array instead of the original array */}
-            {filteredCategories.slice(0, 8).map((item) => {
+            {displayedCategories.map((item) => {
               const id = item._id || item.id || item;
               const title = item.title || item.name || item;
               const slug = item.slug || (typeof item === 'string' ? item : title);
