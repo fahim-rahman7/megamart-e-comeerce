@@ -1,40 +1,267 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { getCookie } from '../components/utils/cookie'
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const API = createApi({
-    reducerPath: 'api',
-    baseQuery: fetchBaseQuery({ baseUrl: 'https://dummyjson.com' }),
-    endpoints: (build) => ({
-      getProducts: build.query({
-        query: ({limit,skip,category}) => `/products${category? "/category/"+ category : ""}?limit=${limit}&skip=${skip}`,
-      }),
-      getProductDetails: build.query({
-        query: ({id}) => `/products/${id}`,
-      }),
-      getCategoryList: build.query({
-        query: () => `/products/category-list`,
-      }),
-      getCart: build.query({
-        query: () => `/carts`,
-      }),
+  reducerPath: 'api',
+  baseQuery: fetchBaseQuery({
+    baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001',
+    // Ensures browser cookies (acc_tkn, ref_tkn) are sent automatically
+    credentials: 'include',
+  }),
+  tagTypes: ['Product', 'Category', 'Cart', 'Profile'],
+  endpoints: (build) => ({
 
-      getProfile: build.query({
-        query: () => ({
-          url: `/auth/me`,
-          headers: {
-            'Authorization': `Bearer ${getCookie()}` , // Pass JWT via Authorization header
-          }, 
-        })
-      }),
-      
-      login: build.mutation({
-        query: (userData)=> ({
-          url: `/auth/login`,
-          method: 'POST',
-          body: userData
-        })
-      })
+    // =========================================================================
+    // 1. PRODUCTS ENDPOINTS
+    // =========================================================================
+
+    // GET /product/allProduct
+    getProducts: build.query({
+      query: ({ limit = 10, page = 1, category, search, hasDiscount } = {}) => {
+        let url = `/product/allProduct?limit=${limit}&page=${page}`;
+        if (category) url += `&category=${encodeURIComponent(category)}`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        if (hasDiscount) url += `&hasDiscount=true`;
+        return url;
+      },
+      providesTags: ['Product'],
     }),
-  })
 
-  export const  { useGetProductsQuery, useGetProductDetailsQuery, useGetCategoryListQuery, useLoginMutation , useGetProfileQuery, useGetCartQuery} = API 
+    // GET /product/:slug
+    getProductDetails: build.query({
+      query: (slug) => `/product/${slug}`,
+      providesTags: (result, error, slug) => [{ type: 'Product', id: slug }],
+    }),
+
+    // POST /product/create (Multipart Form Data)
+    createProduct: build.mutation({
+      query: (formData) => ({
+        url: '/product/create',
+        method: 'POST',
+        body: formData,
+      }),
+      invalidatesTags: ['Product'],
+    }),
+
+    // PUT /product/update/:slug (Multipart Form Data)
+    updateProduct: build.mutation({
+      query: ({ slug, formData }) => ({
+        url: `/product/update/${slug}`,
+        method: 'PUT',
+        body: formData,
+      }),
+      invalidatesTags: (result, error, { slug }) => ['Product', { type: 'Product', id: slug }],
+    }),
+
+    // =========================================================================
+    // 2. CATEGORY ENDPOINTS
+    // =========================================================================
+
+    // GET /category/all
+    getCategoryList: build.query({
+      query: () => '/category/all',
+      providesTags: ['Category'],
+    }),
+
+    // POST /category/create (Multipart Form Data)
+    createCategory: build.mutation({
+      query: (categoryData) => ({
+        url: '/category/create',
+        method: 'POST',
+        body: categoryData,
+      }),
+      invalidatesTags: ['Category'],
+    }),
+
+    // PATCH /category/update/:id (Multipart Form Data)
+    updateCategory: build.mutation({
+      query: ({ id, formData }) => ({
+        url: `/category/update/${id}`,
+        method: 'PATCH',
+        body: formData,
+      }),
+      invalidatesTags: ['Category'],
+    }),
+
+    // DELETE /category/delete/:id
+    deleteCategory: build.mutation({
+      query: (id) => ({
+        url: `/category/delete/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Category'],
+    }),
+
+    // =========================================================================
+    // 3. CART ENDPOINTS
+    // =========================================================================
+
+    // GET /cart/userCart
+    getCart: build.query({
+      query: () => '/cart/userCart',
+      providesTags: ['Cart'],
+    }),
+
+    // POST /cart/add
+    addToCart: build.mutation({
+      query: (cartData) => ({
+        url: '/cart/add',
+        method: 'POST',
+        body: cartData,
+      }),
+      invalidatesTags: ['Cart'],
+    }),
+
+    // PUT /cart/updateCart
+    updateCart: build.mutation({
+      query: (cartData) => ({
+        url: '/cart/updateCart',
+        method: 'PUT',
+        body: cartData,
+      }),
+      invalidatesTags: ['Cart'],
+    }),
+
+    // DELETE /cart/deleteCart
+    removeFromCart: build.mutation({
+      query: (cartData) => ({
+        url: '/cart/deleteCart',
+        method: 'DELETE',
+        body: cartData,
+      }),
+      invalidatesTags: ['Cart'],
+    }),
+
+    // =========================================================================
+    // 4. ORDER & CHECKOUT ENDPOINTS
+    // =========================================================================
+
+    // POST /order/checkout
+    checkout: build.mutation({
+      query: (orderData) => ({
+        url: '/order/checkout',
+        method: 'POST',
+        body: orderData,
+      }),
+      invalidatesTags: ['Cart'],
+    }),
+
+    // =========================================================================
+    // 5. AUTHENTICATION & PROFILE ENDPOINTS
+    // =========================================================================
+
+    // POST /auth/signin
+    login: build.mutation({
+      query: (userData) => ({
+        url: '/auth/signin',
+        method: 'POST',
+        body: userData,
+      }),
+      invalidatesTags: ['Profile', 'Cart'],
+    }),
+
+    // POST /auth/signup
+    signUp: build.mutation({
+      query: (userData) => ({
+        url: '/auth/signup',
+        method: 'POST',
+        body: userData,
+      }),
+    }),
+
+    // POST /auth/verify-email
+    verifyEmail: build.mutation({
+      query: (otpData) => ({
+        url: '/auth/verify-email',
+        method: 'POST',
+        body: otpData,
+      }),
+    }),
+
+    // POST /auth/resend-otp
+    resendOtp: build.mutation({
+      query: (emailData) => ({
+        url: '/auth/resend-otp',
+        method: 'POST',
+        body: emailData,
+      }),
+    }),
+
+    // POST /auth/forget-pass
+    forgetPassword: build.mutation({
+      query: (emailData) => ({
+        url: '/auth/forget-pass',
+        method: 'POST',
+        body: emailData,
+      }),
+    }),
+
+    // POST /auth/reset-pass/:token
+    resetPassword: build.mutation({
+      query: ({ token, newPass }) => ({
+        url: `/auth/reset-pass/${token}`,
+        method: 'POST',
+        body: { newPass },
+      }),
+    }),
+
+    // GET /auth/getprofile
+    getProfile: build.query({
+      query: () => '/auth/getprofile',
+      providesTags: ['Profile'],
+    }),
+
+    // PUT /auth/updateprofile (Multipart Form Data for Avatar)
+    updateProfile: build.mutation({
+      query: (formData) => ({
+        url: '/auth/updateprofile',
+        method: 'PUT',
+        body: formData,
+      }),
+      invalidatesTags: ['Profile'],
+    }),
+
+    // GET /auth/userlist (Admin/Moderator)
+    getUserList: build.query({
+      query: ({ verified, limit = 10, page = 1 } = {}) => {
+        let url = `/auth/userlist?limit=${limit}&page=${page}`;
+        if (verified !== undefined) url += `&verified=${verified}`;
+        return url;
+      },
+    }),
+  }),
+});
+
+// Auto-generated hooks for components
+export const {
+  // Products Hooks
+  useGetProductsQuery,
+  useGetProductDetailsQuery,
+  useCreateProductMutation,
+  useUpdateProductMutation,
+
+  // Category Hooks
+  useGetCategoryListQuery,
+  useCreateCategoryMutation,
+  useUpdateCategoryMutation,
+  useDeleteCategoryMutation,
+
+  // Cart Hooks
+  useGetCartQuery,
+  useAddToCartMutation,
+  useUpdateCartMutation,
+  useRemoveFromCartMutation,
+
+  // Order Hooks
+  useCheckoutMutation,
+
+  // Auth Hooks
+  useLoginMutation,
+  useSignUpMutation,
+  useVerifyEmailMutation,
+  useResendOtpMutation,
+  useForgetPasswordMutation,
+  useResetPasswordMutation,
+  useGetProfileQuery,
+  useUpdateProfileMutation,
+  useGetUserListQuery,
+} = API;

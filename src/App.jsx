@@ -7,6 +7,7 @@ import Registration from "./pages/Registration";
 import LogIn from "./pages/LogIn";
 import Profile from "./pages/Profile";
 import Cart from "./pages/Cart";
+import VerifyEmail from "./pages/VerifyEmail";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/profile" element={<Profile/>}/>
           <Route path="/shop/:id" element={<ProductDetails/>}/>
           <Route path="/cart" element={<Cart/>}/>
+          <Route path="/verify-email" element={<VerifyEmail/>}/>
         </Route>
       </Routes>
     </BrowserRouter>
