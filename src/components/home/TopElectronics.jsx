@@ -32,7 +32,7 @@ const TopElectronics = () => {
           <h2 className="heading">
             Top<span> Electronics Brands </span>
           </h2>
-          <Link to={"/shop"}>View All</Link>
+          {/* <Link to={"/shop"}>View All</Link> */}
         </div>
         <div className="slider-container mt-15">
           <Slider {...settings}>
@@ -46,14 +46,14 @@ const TopElectronics = () => {
             <div>
               <img
                 className="w-11/12"
-                src="/Electronic-Brand.png"
+                src="/Electronic-Brand-2.png"
                 alt="Electronic-Brand"
               />
             </div>
             <div>
               <img
                 className="w-11/12"
-                src="/Electronic-Brand.png"
+                src="/Electronic-Brand-3.png"
                 alt="Electronic-Brand"
               />
             </div>
@@ -64,7 +64,7 @@ const TopElectronics = () => {
                 alt="Electronic-Brand-2"
               />
             </div>
-            <div>
+            {/* <div>
               <img
                 className="w-11/12"
                 src="/Electronic-Brand-3.png"
@@ -77,7 +77,7 @@ const TopElectronics = () => {
                 src="/Electronic-Brand.png"
                 alt="Electronic-Brand"
               />
-            </div>
+            </div> */}
           </Slider>
         </div>
       </div>

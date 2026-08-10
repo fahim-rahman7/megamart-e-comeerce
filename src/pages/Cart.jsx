@@ -1,12 +1,11 @@
 import React from "react";
-import { Link } from "react-router";
+import { Link } from "react-router"; // or "react-router-dom"
 import { 
   useGetCartQuery, 
   useUpdateCartMutation, 
   useRemoveFromCartMutation 
 } from "../service/api";
 import { FiTrash2, FiMinus, FiPlus, FiShoppingBag } from "react-icons/fi";
-import { toast } from "react-toastify"; // Optional: for visual feedback
 
 const Cart = () => {
   const { data, isLoading } = useGetCartQuery();
@@ -191,9 +190,13 @@ const Cart = () => {
                 </div>
               </div>
 
-              <button className="w-full bg-brand text-white font-semibold py-4 rounded-xl hover:bg-brand/90 transition shadow-lg shadow-brand/20 flex items-center justify-center gap-2 cursor-pointer">
+              {/* ⚠️ CHANGED THIS TO A LINK */}
+              <Link 
+                to="/order" 
+                className="w-full bg-brand text-white font-semibold py-4 rounded-xl hover:bg-brand/90 transition shadow-lg shadow-brand/20 flex items-center justify-center gap-2"
+              >
                 Proceed to Checkout
-              </button>
+              </Link>
               
               <Link to="/shop" className="block text-center text-brand font-medium mt-4 hover:underline">
                 Continue Shopping

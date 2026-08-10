@@ -8,23 +8,35 @@ import LogIn from "./pages/LogIn";
 import Profile from "./pages/Profile";
 import Cart from "./pages/Cart";
 import VerifyEmail from "./pages/VerifyEmail";
+import Order from "./pages/Order";
+
+// 1. Import ToastContainer and the CSS file
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // ⚠️ ADD THIS CSS IMPORT
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="/shop" element={<Shop/>}/>
-          <Route path="/registration" element={<Registration/>}/>
-          <Route path="/login" element={<LogIn/>}/>
-          <Route path="/profile" element={<Profile/>}/>
-          <Route path="/shop/:id" element={<ProductDetails/>}/>
-          <Route path="/cart" element={<Cart/>}/>
-          <Route path="/verify-email" element={<VerifyEmail/>}/>
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    // 2. Wrap everything in a Fragment <> so you can return two things
+    <>
+      {/* 3. Place the ToastContainer here so it is available everywhere */}
+      <ToastContainer position="top-right" />
+
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="/shop" element={<Shop/>}/>
+            <Route path="/registration" element={<Registration/>}/>
+            <Route path="/login" element={<LogIn/>}/>
+            <Route path="/profile" element={<Profile/>}/>
+            <Route path="/shop/:id" element={<ProductDetails/>}/>
+            <Route path="/cart" element={<Cart/>}/>
+            <Route path="/verify-email" element={<VerifyEmail/>}/>
+            <Route path="/order" element={<Order/>}/>
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </>
   );
 }
 

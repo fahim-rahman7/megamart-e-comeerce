@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router";
 import { useGetCategoryListQuery } from "../../service/api";
+// 1. Import your new loading component (adjust the path if needed)
+import CategoryLoading from "../ui/CategoryLoading"; 
 
 const Categories = () => {
   const { data, isLoading } = useGetCategoryListQuery();
@@ -34,9 +36,11 @@ const Categories = () => {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-10">
-            <p className="text-gray-500 font-medium">Loading categories...</p>
-          </div>
+          // 2. Use CategoryLoading with 8 items and the exact grid classes used below
+          <CategoryLoading 
+            count={8} 
+            className="mt-15 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4" 
+          />
         ) : (
           <div className="mt-15 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
             {displayedCategories.map((item) => {

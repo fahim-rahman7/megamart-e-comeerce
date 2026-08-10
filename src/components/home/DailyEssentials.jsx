@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router"; // or "react-router-dom"
 import { useGetProductsQuery } from "../../service/api";
+import DailyEssentialsLoading from "../ui/DailyEssentialsLoading";
 
 const DailyEssentials = () => {
   // Changed category to target your new daily-essentials category
@@ -24,9 +25,7 @@ const DailyEssentials = () => {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-10">
-            <p className="text-gray-500 font-medium">Loading essentials...</p>
-          </div>
+         <DailyEssentialsLoading count={8} className="mt-10 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4"/>
         ) : (
           <div className="mt-15 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-8 gap-4">
             {data?.products?.length > 0 ? (
