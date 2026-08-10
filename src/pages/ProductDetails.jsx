@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { FiShoppingBag, FiCheck, FiShield, FiTruck, FiRefreshCw } from "react-icons/fi";
+import ProductDetailsLoading from "../components/ui/ProductDetailsLoading";
 
 const ProductDetails = () => {
   const sliderRef1 = useRef(null);
@@ -128,9 +129,7 @@ const ProductDetails = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[60vh]">
-        <p className="text-xl text-gray-500 font-medium animate-pulse">Loading product details...</p>
-      </div>
+     <ProductDetailsLoading/>
     );
   }
 
