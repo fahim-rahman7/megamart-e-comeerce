@@ -75,7 +75,7 @@ const ProductList = () => {
 
             {/* Products Grid */}
             {isLoading || isFetching ? (
-              <Loading count={limit}/>
+              <Loading count={limit} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-5"/>
             ) : (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-5">
