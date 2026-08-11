@@ -16,12 +16,10 @@ const Navbar = () => {
   const categories = Array.isArray(categoryData) ? categoryData : categoryData?.categories || [];
 
   // Check if user has an auth cookie before making the request
-  const hasAuthToken = document.cookie.includes("acc_tkn=");
+  // const hasAuthToken = document.cookie.includes("acc_tkn=");
 
   // Skip request if no token exists to avoid 401 console error
-  const { data: profile } = useGetProfileQuery(undefined, {
-    skip: !hasAuthToken,
-  });
+  const { data: profile } = useGetProfileQuery();
 
   // Search Handler
   const handleSearch = (e) => {
