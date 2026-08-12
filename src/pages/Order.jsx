@@ -1,24 +1,26 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router"; // or "react-router-dom"
-import { 
-  useGetCartQuery, 
-  useCheckoutMutation, 
-  useRemoveFromCartMutation // 1. Imported the remove mutation
+import { Link, useNavigate } from "react-router";
+import {
+  useGetCartQuery,
+  useCheckoutMutation,
+  useRemoveFromCartMutation,
 } from "../service/api";
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
+import OrderSuccessModal from "../components/ui/OrderSuccessModal"; // 1. Import the popup modal
 
 const Order = () => {
   const navigate = useNavigate();
   const { data, isLoading } = useGetCartQuery();
   const [checkout, { isLoading: isCheckingOut }] = useCheckoutMutation();
-  
-  // 2. Initialized the remove hook
-  const [removeFromCart] = useRemoveFromCartMutation(); 
+  const [removeFromCart] = useRemoveFromCartMutation();
 
   // Form State
   const [shippingAddress, setShippingAddress] = useState("");
   const [insideDhaka, setInsideDhaka] = useState("true");
   const [paymentType, setPaymentType] = useState("card");
+
+  // Modal Visibility State
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   const cart = data?.cartData || data;
   const cartItems = cart?.items || [];
@@ -47,27 +49,32 @@ const Order = () => {
       if (paymentType === "card" && response.url) {
         window.location.href = response.url;
       } else {
-        // Cash on delivery success
-        toast.success("Order Placed Successfully!");
+        // 2. Open the custom success modal popup instead of relying on quick toasts
+        setIsSuccessModalOpen(true);
 
-        // 3. Clear the cart by removing all items sequentially
-        try {
-          await Promise.all(
-            cartItems.map((item) =>
-              removeFromCart({ 
-                cartId: cart._id, 
-                productId: item.product?._id 
-              }).unwrap()
-            )
-          );
-        } catch (removeErr) {
-          console.error("Non-fatal error: Failed to clear cart items", removeErr);
-        }
+        // Clear the cart by removing all items sequentially in the background
+        setTimeout(() => {
+          try {
+            Promise.all(
+              cartItems.map((item) =>
+                removeFromCart({
+                  cartId: cart._id,
+                  productId: item.product?._id,
+                }).unwrap()
+              )
+            );
+          } catch (removeErr) {
+            console.error(
+              "Non-fatal error: Failed to clear cart items",
+              removeErr
+            );
+          }
+        }, 4000);
 
-        // ⚠️ ADD A DELAY BEFORE NAVIGATING
+        // 3. Give the user enough time to see the checkmark modal before redirecting
         setTimeout(() => {
           navigate("/shop");
-        }, 1500); // Or navigate to a success page
+        }, 7000);
       }
     } catch (err) {
       console.error("Checkout error:", err);
@@ -78,7 +85,9 @@ const Order = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
-        <p className="text-xl text-gray-500 font-medium animate-pulse">Loading checkout...</p>
+        <p className="text-xl text-gray-500 font-medium animate-pulse">
+          Loading checkout...
+        </p>
       </div>
     );
   }
@@ -88,28 +97,43 @@ const Order = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <h2 className="text-2xl font-bold mb-4">Your cart is empty</h2>
-        <Link to="/cart" className="text-brand hover:underline">Go back to Cart</Link>
+        <Link to="/cart" className="text-brand hover:underline">
+          Go back to Cart
+        </Link>
       </div>
     );
   }
 
   return (
-    <section className="py-12 bg-gray-50 min-h-screen">
+    <section className="py-12 bg-gray-50 min-h-screen relative">
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+      />
+
+      {/* Render the Success Modal Component */}
+      <OrderSuccessModal
+        isOpen={isSuccessModalOpen}
+        onClose={() => setIsSuccessModalOpen(false)}
+      />
+
       <div className="container mx-auto px-4">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          
           {/* CHECKOUT FORM */}
           <div className="lg:w-2/3">
             <div className="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm">
-              <h2 className="text-xl font-bold mb-6 border-b pb-4">Shipping Details</h2>
-              
+              <h2 className="text-xl font-bold mb-6 border-b pb-4">
+                Shipping Details
+              </h2>
+
               <form onSubmit={handlePlaceOrder} className="space-y-6">
-                {/* Address Field */}
                 <div>
                   <label className="block text-gray-700 font-medium mb-2">
-                    Complete Shipping Address <span className="text-red-500">*</span>
+                    Complete Shipping Address{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     required
@@ -121,11 +145,18 @@ const Order = () => {
                   />
                 </div>
 
-                {/* Delivery Area */}
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">Delivery Area</label>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Delivery Area
+                  </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <label className={`border rounded-xl p-4 cursor-pointer transition ${insideDhaka === "true" ? "border-brand bg-brand/5" : "border-gray-200"}`}>
+                    <label
+                      className={`border rounded-xl p-4 cursor-pointer transition ${
+                        insideDhaka === "true"
+                          ? "border-brand bg-brand/5"
+                          : "border-gray-200"
+                      }`}
+                    >
                       <div className="flex items-center gap-3">
                         <input
                           type="radio"
@@ -136,12 +167,22 @@ const Order = () => {
                           className="w-4 h-4 text-brand"
                         />
                         <div>
-                          <p className="font-semibold text-gray-900">Inside Dhaka</p>
-                          <p className="text-sm text-gray-500">Delivery Charge: ৳ 80</p>
+                          <p className="font-semibold text-gray-900">
+                            Inside Dhaka
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Delivery Charge: ৳ 80
+                          </p>
                         </div>
                       </div>
                     </label>
-                    <label className={`border rounded-xl p-4 cursor-pointer transition ${insideDhaka === "false" ? "border-brand bg-brand/5" : "border-gray-200"}`}>
+                    <label
+                      className={`border rounded-xl p-4 cursor-pointer transition ${
+                        insideDhaka === "false"
+                          ? "border-brand bg-brand/5"
+                          : "border-gray-200"
+                      }`}
+                    >
                       <div className="flex items-center gap-3">
                         <input
                           type="radio"
@@ -152,19 +193,30 @@ const Order = () => {
                           className="w-4 h-4 text-brand"
                         />
                         <div>
-                          <p className="font-semibold text-gray-900">Outside Dhaka</p>
-                          <p className="text-sm text-gray-500">Delivery Charge: ৳ 120</p>
+                          <p className="font-semibold text-gray-900">
+                            Outside Dhaka
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Delivery Charge: ৳ 120
+                          </p>
                         </div>
                       </div>
                     </label>
                   </div>
                 </div>
 
-                {/* Payment Method */}
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2 mt-4">Payment Method</label>
+                  <label className="block text-gray-700 font-medium mb-2 mt-4">
+                    Payment Method
+                  </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <label className={`border rounded-xl p-4 cursor-pointer transition ${paymentType === "card" ? "border-brand bg-brand/5" : "border-gray-200"}`}>
+                    <label
+                      className={`border rounded-xl p-4 cursor-pointer transition ${
+                        paymentType === "card"
+                          ? "border-brand bg-brand/5"
+                          : "border-gray-200"
+                      }`}
+                    >
                       <div className="flex items-center gap-3">
                         <input
                           type="radio"
@@ -175,12 +227,22 @@ const Order = () => {
                           className="w-4 h-4 text-brand"
                         />
                         <div>
-                          <p className="font-semibold text-gray-900">Online Payment</p>
-                          <p className="text-sm text-gray-500">Pay securely via Stripe</p>
+                          <p className="font-semibold text-gray-900">
+                            Online Payment
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Pay securely via Stripe
+                          </p>
                         </div>
                       </div>
                     </label>
-                    <label className={`border rounded-xl p-4 cursor-pointer transition ${paymentType === "cash" ? "border-brand bg-brand/5" : "border-gray-200"}`}>
+                    <label
+                      className={`border rounded-xl p-4 cursor-pointer transition ${
+                        paymentType === "cash"
+                          ? "border-brand bg-brand/5"
+                          : "border-gray-200"
+                      }`}
+                    >
                       <div className="flex items-center gap-3">
                         <input
                           type="radio"
@@ -191,8 +253,12 @@ const Order = () => {
                           className="w-4 h-4 text-brand"
                         />
                         <div>
-                          <p className="font-semibold text-gray-900">Cash on Delivery</p>
-                          <p className="text-sm text-gray-500">Pay when you receive it</p>
+                          <p className="font-semibold text-gray-900">
+                            Cash on Delivery
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Pay when you receive it
+                          </p>
                         </div>
                       </div>
                     </label>
@@ -211,12 +277,19 @@ const Order = () => {
 
               <div className="space-y-3 mb-6 max-h-[300px] overflow-y-auto pr-2">
                 {cartItems.map((item) => (
-                  <div key={item._id} className="flex justify-between items-center text-sm border-b border-gray-50 pb-2">
+                  <div
+                    key={item._id}
+                    className="flex justify-between items-center text-sm border-b border-gray-50 pb-2"
+                  >
                     <div className="flex-1">
-                      <p className="font-medium text-gray-800 line-clamp-1">{item.product?.title || "Product"}</p>
+                      <p className="font-medium text-gray-800 line-clamp-1">
+                        {item.product?.title || "Product"}
+                      </p>
                       <p className="text-gray-500">Qty: {item.quantity}</p>
                     </div>
-                    <span className="font-semibold text-gray-900">৳ {item.subtotal}</span>
+                    <span className="font-semibold text-gray-900">
+                      ৳ {item.subtotal}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -224,31 +297,38 @@ const Order = () => {
               <div className="space-y-4 mb-6 pt-2">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>
-                  <span className="font-medium text-gray-900">৳ {subtotal.toFixed(2)}</span>
+                  <span className="font-medium text-gray-900">
+                    ৳ {subtotal.toFixed(2)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Delivery Charge</span>
-                  <span className="font-medium text-gray-900">৳ {deliveryCharge.toFixed(2)}</span>
+                  <span className="font-medium text-gray-900">
+                    ৳ {deliveryCharge.toFixed(2)}
+                  </span>
                 </div>
               </div>
 
               <div className="border-t border-gray-100 pt-4 mb-6">
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-bold text-gray-900">Total</span>
-                  <span className="text-2xl font-bold text-brand">৳ {totalAmount.toFixed(2)}</span>
+                  <span className="text-2xl font-bold text-brand">
+                    ৳ {totalAmount.toFixed(2)}
+                  </span>
                 </div>
               </div>
 
-              <button 
+              <button
                 onClick={handlePlaceOrder}
-                disabled={isCheckingOut}
+                disabled={isCheckingOut || isSuccessModalOpen}
                 className="w-full bg-brand text-white font-semibold py-4 rounded-xl hover:bg-brand/90 transition shadow-lg shadow-brand/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
-                {isCheckingOut ? "Processing..." : `Place Order (৳ ${totalAmount.toFixed(2)})`}
+                {isCheckingOut
+                  ? "Processing..."
+                  : `Place Order (৳ ${totalAmount.toFixed(2)})`}
               </button>
             </div>
           </div>
-
         </div>
       </div>
     </section>
