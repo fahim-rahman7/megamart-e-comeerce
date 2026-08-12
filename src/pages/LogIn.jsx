@@ -27,22 +27,6 @@ const LogIn = () => {
     setFieldErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const parseBackendError = (message) => {
-    const lowerMsg = message.toLowerCase();
-    const errors = {};
-
-    if (lowerMsg.includes("credential")) {
-      errors.email = message;
-      errors.password = message;
-    } else if (lowerMsg.includes("email")) {
-      errors.email = message;
-    } else if (lowerMsg.includes("password")) {
-      errors.password = message;
-    }
-
-    setFieldErrors(errors);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFieldErrors({});
@@ -57,14 +41,34 @@ const LogIn = () => {
       }, 1000);
     } catch (err) {
       const errorMsg = err?.data?.message || "Login failed. Please try again.";
+      const lowerMsg = errorMsg.toLowerCase();
 
-      toast.error(errorMsg);
-      parseBackendError(errorMsg);
+      // Check for specific input field validation errors
+      const isEmailRequired = lowerMsg.includes("email is required") || lowerMsg.includes("email required");
+      const isEmailInvalid = lowerMsg.includes("email is not valid") || lowerMsg.includes("email not valid");
+      const isPasswordRequired = lowerMsg.includes("password is required") || lowerMsg.includes("password required");
 
-      if (errorMsg.toLowerCase().includes("not verified")) {
-        setTimeout(() => {
-          navigate("/verify-email", { state: { email: loginData.email } });
-        }, 1500);
+      const isFieldError = isEmailRequired || isEmailInvalid || isPasswordRequired;
+
+      if (isFieldError) {
+        // Show ONLY inline field errors (No Toastify)
+        const errors = {};
+        if (isEmailRequired || isEmailInvalid) {
+          errors.email = errorMsg;
+        }
+        if (isPasswordRequired) {
+          errors.password = errorMsg;
+        }
+        setFieldErrors(errors);
+      } else {
+        // Show ONLY Toastify for global/auth errors (Invalid credentials, Email not verified, Server errors)
+        toast.error(errorMsg);
+
+        if (lowerMsg.includes("not verified")) {
+          setTimeout(() => {
+            navigate("/verify-email", { state: { email: loginData.email } });
+          }, 1500);
+        }
       }
     }
   };
