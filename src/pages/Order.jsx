@@ -1,12 +1,19 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router"; // or "react-router-dom"
-import { useGetCartQuery, useCheckoutMutation } from "../service/api";
+import { 
+  useGetCartQuery, 
+  useCheckoutMutation, 
+  useRemoveFromCartMutation // 1. Imported the remove mutation
+} from "../service/api";
 import { toast } from "react-toastify";
 
 const Order = () => {
   const navigate = useNavigate();
   const { data, isLoading } = useGetCartQuery();
   const [checkout, { isLoading: isCheckingOut }] = useCheckoutMutation();
+  
+  // 2. Initialized the remove hook
+  const [removeFromCart] = useRemoveFromCartMutation(); 
 
   // Form State
   const [shippingAddress, setShippingAddress] = useState("");
@@ -25,7 +32,7 @@ const Order = () => {
     e.preventDefault();
 
     if (!shippingAddress.trim()) {
-      return toast.error("Please enter a valid shipping address.");
+      return toast.error("Please enter an address.");
     }
 
     try {
@@ -42,10 +49,25 @@ const Order = () => {
       } else {
         // Cash on delivery success
         toast.success("Order Placed Successfully!");
+
+        // 3. Clear the cart by removing all items sequentially
+        try {
+          await Promise.all(
+            cartItems.map((item) =>
+              removeFromCart({ 
+                cartId: cart._id, 
+                productId: item.product?._id 
+              }).unwrap()
+            )
+          );
+        } catch (removeErr) {
+          console.error("Non-fatal error: Failed to clear cart items", removeErr);
+        }
+
         // ⚠️ ADD A DELAY BEFORE NAVIGATING
         setTimeout(() => {
-            navigate("/shop"); 
-          }, 1500); // Or navigate to a success page
+          navigate("/shop");
+        }, 1500); // Or navigate to a success page
       }
     } catch (err) {
       console.error("Checkout error:", err);
