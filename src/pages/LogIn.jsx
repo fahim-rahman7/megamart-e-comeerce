@@ -9,19 +9,15 @@ import "react-toastify/dist/ReactToastify.css";
 const LogIn = () => {
   const [login, { isLoading }] = useLoginMutation();
   const [passToggle, setPassToggle] = useState(false);
+  const navigate = useNavigate();
 
-  // Express backend expects `email` and `password`
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
   });
 
-  // State for inline field errors
   const [fieldErrors, setFieldErrors] = useState({});
 
-  const navigate = useNavigate();
-
-  // Clear specific field errors when typing
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setLoginData((prev) => ({
@@ -31,19 +27,16 @@ const LogIn = () => {
     setFieldErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  // Maps backend error messages to UI inputs
   const parseBackendError = (message) => {
     const lowerMsg = message.toLowerCase();
     const errors = {};
 
-    if (lowerMsg.includes("email")) {
+    if (lowerMsg.includes("credential")) {
       errors.email = message;
-    }
-    if (lowerMsg.includes("password")) {
       errors.password = message;
-    }
-    if (lowerMsg.includes("crediential") || lowerMsg.includes("credential")) {
+    } else if (lowerMsg.includes("email")) {
       errors.email = message;
+    } else if (lowerMsg.includes("password")) {
       errors.password = message;
     }
 
@@ -65,13 +58,9 @@ const LogIn = () => {
     } catch (err) {
       const errorMsg = err?.data?.message || "Login failed. Please try again.";
 
-      // Show toast notification
       toast.error(errorMsg);
-
-      // Parse error message for inline field display
       parseBackendError(errorMsg);
 
-      // Auto-redirect to OTP verification if the email isn't verified yet
       if (errorMsg.toLowerCase().includes("not verified")) {
         setTimeout(() => {
           navigate("/verify-email", { state: { email: loginData.email } });
@@ -96,7 +85,7 @@ const LogIn = () => {
               onChange={handleInputChange}
               label="Email Address"
               placeholder="Enter your email"
-              type="email"
+              type="text"
             />
             {fieldErrors.email && (
               <p className="text-xs text-red-500 mt-1">{fieldErrors.email}</p>
@@ -132,17 +121,11 @@ const LogIn = () => {
           <div className="flex items-center justify-between flex-wrap">
             <p className="text-primary mt-2">
               Don't have an account?{" "}
-              <Link
-                className="text-sm text-blue-500 hover:underline"
-                to="/registration"
-              >
+              <Link className="text-sm text-blue-500 hover:underline" to="/registration">
                 Sign up
               </Link>
             </p>
-            <Link
-              className="text-sm text-blue-500 hover:underline mt-2"
-              to="/forget-password"
-            >
+            <Link className="text-sm text-blue-500 hover:underline mt-2" to="/forget-password">
               Forgot password?
             </Link>
           </div>
