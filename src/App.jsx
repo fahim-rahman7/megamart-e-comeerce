@@ -13,6 +13,7 @@ import Order from "./pages/Order";
 // 1. Import ToastContainer and the CSS file
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // ⚠️ ADD THIS CSS IMPORT
+import MyOrders from "./pages/MyOrders";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
             <Route path="/cart" element={<Cart/>}/>
             <Route path="/verify-email" element={<VerifyEmail/>}/>
             <Route path="/order" element={<Order/>}/>
+            <Route path="/orders" element={<MyOrders/>}/>
           </Route>
         </Routes>
       </BrowserRouter>

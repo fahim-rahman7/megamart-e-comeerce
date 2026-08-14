@@ -7,7 +7,7 @@ export const API = createApi({
     // Ensures browser cookies (acc_tkn, ref_tkn) are sent automatically
     credentials: 'include',
   }),
-  tagTypes: ['Product', 'Category', 'Cart', 'Profile'],
+  tagTypes: ['Product', 'Category', 'Cart', 'Profile', 'Order'],
   endpoints: (build) => ({
 
     // =========================================================================
@@ -182,6 +182,12 @@ export const API = createApi({
       invalidatesTags: ['Cart'],
     }),
 
+    // GET /order/myorders
+    getMyOrders: build.query({
+      query: () => '/order/myorders',
+      providesTags: ['Order'],
+    }),
+
     // =========================================================================
     // 5. AUTHENTICATION & PROFILE ENDPOINTS
     // =========================================================================
@@ -290,7 +296,7 @@ export const {
 
   // Order Hooks
   useCheckoutMutation,
-
+  useGetMyOrdersQuery,
   // Auth Hooks
   useLoginMutation,
   useSignUpMutation,
