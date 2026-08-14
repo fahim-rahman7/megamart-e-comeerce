@@ -111,14 +111,51 @@ export const API = createApi({
       invalidatesTags: ['Cart'],
     }),
 
-    // PUT /cart/updateCart
+// PUT /cart/updateCart
     updateCart: build.mutation({
       query: (cartData) => ({
         url: '/cart/updateCart',
         method: 'PUT',
         body: cartData,
       }),
-      invalidatesTags: ['Cart'],
+      // Keep this so the app guarantees full synchronization with the backend eventually
+      invalidatesTags: ['Cart'], 
+      
+      // Add this Optimistic Update logic
+      async onQueryStarted({ itemId, quantity }, { dispatch, queryFulfilled }) {
+        // 1. Dispatch an update to the cached 'getCart' data instantly
+        const patchResult = dispatch(
+          API.util.updateQueryData('getCart', undefined, (draft) => {
+            // Find the specific item in our cached cart draft
+            const item = draft.cartData?.items?.find((i) => i._id === itemId);
+            
+            if (item) {
+              // Calculate the unit price based on existing subtotal & quantity
+              const unitPrice = item.subtotal / item.quantity;
+              
+              // Apply the new quantity and recalculate subtotal instantly
+              item.quantity = quantity;
+              item.subtotal = unitPrice * quantity;
+              
+              // Recalculate total items across the whole cart
+              if (draft.cartData?.items) {
+                draft.cartData.totalItems = draft.cartData.items.reduce(
+                  (acc, i) => acc + i.quantity,
+                  0
+                );
+              }
+            }
+          })
+        );
+        
+        try {
+          // 2. Wait for the actual backend PUT request to complete
+          await queryFulfilled;
+        } catch {
+          // 3. If the backend request fails for any reason, revert the UI instantly
+          patchResult.undo();
+        }
+      },
     }),
 
     // DELETE /cart/deleteCart
