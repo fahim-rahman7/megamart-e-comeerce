@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import {
   useGetCartQuery,
   useCheckoutMutation,
   useRemoveFromCartMutation,
+  useGetProfileQuery,
 } from "../service/api";
 import { ToastContainer, toast } from "react-toastify";
 import OrderSuccessModal from "../components/ui/OrderSuccessModal"; // 1. Import the popup modal
@@ -11,6 +12,8 @@ import OrderSuccessModal from "../components/ui/OrderSuccessModal"; // 1. Import
 const Order = () => {
   const navigate = useNavigate();
   const { data, isLoading } = useGetCartQuery();
+  const { data: profileData } = useGetProfileQuery();
+
   const [checkout, { isLoading: isCheckingOut }] = useCheckoutMutation();
   const [removeFromCart] = useRemoveFromCartMutation();
 
@@ -24,6 +27,26 @@ const Order = () => {
 
   const cart = data?.cartData || data;
   const cartItems = cart?.items || [];
+
+  // 3. Pre-fill the shipping address when profileData is loaded
+  useEffect(() => {
+    if (profileData?.address) {
+      let formattedAddress = "";
+      
+      // Handle both string and object address formats (matching your Profile logic)
+      if (typeof profileData.address === "string") {
+        formattedAddress = profileData.address;
+      } else {
+        const { street, address, city, postalCode } = profileData.address;
+        const streetPart = street || address || "";
+        // Join the available parts with a comma
+        formattedAddress = [streetPart, city, postalCode].filter(Boolean).join(", ");
+      }
+
+      // Only set it if the user hasn't already started typing something manually
+      setShippingAddress((prev) => prev || formattedAddress);
+    }
+  }, [profileData]);
 
   // Calculations
   const subtotal = cartItems.reduce((sum, item) => sum + item.subtotal, 0);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, Navigate } from "react-router"; // or "react-router-dom"
+import { Link, Navigate } from "react-router";
 import { 
   useGetProfileQuery, 
   useUpdateProfileMutation, 
@@ -222,8 +222,8 @@ const Profile = () => {
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Email Address</label>
-                  <p className="font-medium text-gray-500 bg-gray-50 px-4 py-3 rounded-xl border border-gray-100 cursor-not-allowed flex justify-between items-center">
-                    {profileData.email} <span className="text-[10px] bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full">Read Only</span>
+                  <p className="font-medium text-gray-500 bg-gray-50 px-4 py-3 rounded-xl border border-gray-100 cursor-not-allowed flex justify-between items-center gap-2">
+                    {profileData.email} <span className="text-[10px] bg-gray-200 text-gray-500 px-3 py-1 rounded-full">Read Only</span>
                   </p>
                 </div>
               </div>
@@ -297,7 +297,7 @@ const Profile = () => {
                             {new Date(order.createdAt).toLocaleDateString()}
                           </p>
                         </div>
-                        <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider ${getStatusColor(order.status)}`}>
+                        <span className={`text-[10px] font-bold px-2 py-2 rounded-full uppercase tracking-wider ${getStatusColor(order.status)}`}>
                           {order.status}
                         </span>
                       </div>
