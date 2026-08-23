@@ -1,11 +1,10 @@
 import React from "react";
 import { BsWhatsapp } from "react-icons/bs";
 import { PiPhone } from "react-icons/pi";
-import { Link } from "react-router"; // Ensure this is react-router or react-router-dom based on your setup
-import { useGetCategoryListQuery } from "../../service/api"; // Adjust the path to your api slice
+import { Link } from "react-router"; 
+import { useGetCategoryListQuery } from "../../service/api"; 
 
 const Footer = () => {
-  // Fetch categories from your API
   const { data: categories, isLoading } = useGetCategoryListQuery();
 
   return (
@@ -17,24 +16,54 @@ const Footer = () => {
           <div>
             <img src="/Logo-theme.png" alt="Logo-theme" />
             <h2 className="text-theme font-bold text-xl mt-9">Contact Us</h2>
-            <div className="text-theme mt-5 flex gap-3">
+            
+            {/* WhatsApp Link */}
+            <a 
+              href="https://wa.me/12029182132" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-theme mt-5 flex gap-3 hover:opacity-80 transition-opacity cursor-pointer w-fit"
+            >
               <BsWhatsapp className="text-xl" />
               <div className="text-base">
                 <p>WhatsApp</p>
                 <p>+1 202-918-2132</p>
               </div>
-            </div>
-            <div className="text-theme mt-5 flex gap-3 ">
+            </a>
+
+            {/* Phone Call Link */}
+            <a 
+              href="tel:+12029182132" 
+              className="text-theme mt-5 flex gap-3 hover:opacity-80 transition-opacity cursor-pointer w-fit"
+            >
               <PiPhone className="text-xl" />
               <div className="text-base">
                 <p>Call Us</p>
                 <p>+1 202-918-2132</p>
               </div>
-            </div>
+            </a>
+
             <h3 className="text-theme mt-5 font-bold text-xl">Download App</h3>
+            
+            {/* App Store Links */}
             <div className="flex gap-5 mt-5">
-              <img src="/Footer-1.png" alt="App Store" className="cursor-pointer" />
-              <img src="/Footer-2.png" alt="Google Play" className="cursor-pointer" />
+              <a 
+                href="https://www.apple.com/app-store/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:opacity-80 transition-opacity hover:-translate-y-1 transform duration-300"
+              >
+                <img src="/Footer-1.png" alt="App Store" className="cursor-pointer" />
+              </a>
+              
+              <a 
+                href="https://play.google.com/store" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:opacity-80 transition-opacity hover:-translate-y-1 transform duration-300"
+              >
+                <img src="/Footer-2.png" alt="Google Play" className="cursor-pointer" />
+              </a>
             </div>
           </div>
 
@@ -48,10 +77,8 @@ const Footer = () => {
               <p className="mt-5 text-theme/70">Loading categories...</p>
             ) : (
               <ul className="mt-5 list-disc pl-6 space-y-4">
-                {/* Slice to only show the first 8 categories so it doesn't break the layout */}
                 {categories?.slice(0, 8).map((cat) => (
                   <li key={cat._id || cat.id}>
-                    {/* Link directly to the shop page with the category filter applied */}
                     <Link 
                       to={`/shop?category=${cat.slug}`} 
                       className="hover:opacity-80 transition-opacity"
@@ -82,7 +109,6 @@ const Footer = () => {
               <li>
                 <Link to="/privacy-policy" className="hover:opacity-80 transition-opacity">Privacy Policy</Link>
               </li>
-              {/* Added links that make sense for your specific API endpoints */}
               <li>
                 <Link to="/profile" className="hover:opacity-80 transition-opacity">My Account</Link>
               </li>
