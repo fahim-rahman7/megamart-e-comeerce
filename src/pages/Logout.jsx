@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router";
 import { useDispatch } from "react-redux";
-// 1. Correctly import 'API' (capitalized) to match your api.js file
 import { API } from "../service/api";
 import { toast } from "react-toastify";
 
@@ -11,31 +10,41 @@ const Logout = ({ className }) => {
 
   const handleLogout = async () => {
     try {
-      // Replace VITE_API_BASE_URL to match your .env variable (or default to localhost)
       const backendUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+      const token = localStorage.getItem("acc_tkn");
 
-      // 2. Call the backend to clear the HTTP-only cookies
+      // 1. Send request with both cookies and Bearer header
       const response = await fetch(`${backendUrl}/auth/logout`, {
         method: "POST",
-        credentials: "include", // CRITICAL: Tells the browser to send cookies to clear them
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
         },
       });
 
-      if (response.ok) {
-        // 3. Clear the RTK Query cache using 'API'
-        dispatch(API.util.resetApiState());
+      // 2. Remove token from localStorage for mobile / iOS Safari
+      localStorage.removeItem("acc_tkn");
 
-        // 4. Show success toast and redirect
+      // 3. Reset RTK Query cache
+      dispatch(API.util.resetApiState());
+
+      if (response.ok) {
         toast.success("Logged out successfully");
-        navigate("/login");
       } else {
-        toast.error("Logout failed. Please try again.");
+        toast.info("Logged out locally");
       }
+
+      navigate("/login");
     } catch (error) {
       console.error("Logout error:", error);
-      toast.error("An error occurred during logout.");
+
+      // Ensure local cleanup even if the backend request encounters a network error
+      localStorage.removeItem("acc_tkn");
+      dispatch(API.util.resetApiState());
+      
+      toast.error("An error occurred during logout");
+      navigate("/login");
     }
   };
 
