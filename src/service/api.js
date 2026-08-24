@@ -208,22 +208,31 @@ export const API = createApi({
     // 4. ORDER & CHECKOUT ENDPOINTS
     // =========================================================================
 
-    // POST /order/checkout
-    checkout: build.mutation({
-      query: (orderData) => ({
-        url: '/order/checkout',
-        method: 'POST',
-        body: orderData,
-      }),
-      invalidatesTags: ['Cart'],
-    }),
+// POST /order/checkout/cart (Checkout using stored Cart)
+cartCheckout: build.mutation({
+  query: (orderData) => ({
+    url: '/order/checkout/cart',
+    method: 'POST',
+    body: orderData,
+  }),
+  invalidatesTags: ['Cart', 'Order'], // Clears cart cache and refreshes user orders
+}),
 
-    // GET /order/myorders
-    getMyOrders: build.query({
-      query: () => '/order/myorders',
-      providesTags: ['Order'],
-    }),
+// POST /order/checkout/direct (Immediate Buy-Now flow)
+directCheckout: build.mutation({
+  query: (orderData) => ({
+    url: '/order/checkout/direct',
+    method: 'POST',
+    body: orderData,
+  }),
+  invalidatesTags: ['Order'], // Refreshes user order history
+}),
 
+// GET /order/myorders
+getMyOrders: build.query({
+  query: () => '/order/myorders',
+  providesTags: ['Order'],
+}),
     // =========================================================================
     // 5. AUTHENTICATION & PROFILE ENDPOINTS
     // =========================================================================
@@ -355,7 +364,8 @@ export const {
   useRemoveFromCartMutation,
 
   // Order Hooks
-  useCheckoutMutation,
+  useDirectCheckoutMutation,
+  useCartCheckoutMutation,
   useGetMyOrdersQuery,
   // Auth Hooks
   useLoginMutation,

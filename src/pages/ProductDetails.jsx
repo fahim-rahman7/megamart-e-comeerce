@@ -6,7 +6,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { FiShoppingBag, FiCheck, FiShield, FiTruck, FiRefreshCw } from "react-icons/fi";
+import { FiShoppingBag, FiCheck, FiShield, FiTruck, FiRefreshCw, FiZap } from "react-icons/fi";
 import ProductDetailsLoading from "../components/ui/ProductDetailsLoading";
 
 const ProductDetails = () => {
@@ -89,6 +89,35 @@ const ProductDetails = () => {
       toast.error(err?.data?.message || "Failed to add product to cart");
     }
   };
+
+// Direct checkout handler without mutating the cart DB
+const handleOrderNow = () => {
+  if (stockLimit < 1) {
+    toast.error("This item is out of stock");
+    return;
+  }
+
+  // Build the temporary direct item payload
+  const directOrderItem = {
+    _id: `direct-${Date.now()}`,
+    product: {
+      _id: product?._id || id,
+      title: product?.title,
+      price: currentPrice,
+      images: productImages,
+    },
+    quantity,
+    subtotal: currentPrice * quantity,
+    sku: currentSku,
+    selectedVariant,
+  };
+
+  // 1. Store in sessionStorage so browser refreshes won't lose the item
+  sessionStorage.setItem("directOrderItem", JSON.stringify(directOrderItem));
+
+  // 2. Navigate directly to order checkout
+  navigate("/order", { state: { directOrderItem } });
+};
 
   const handleMouseMove = (e) => {
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
@@ -250,7 +279,7 @@ const ProductDetails = () => {
                 </p>
               </div>
 
-              {/* Variants Selector (Size / Storage / Color) */}
+              {/* Variants Selector */}
               {variants.length > 0 && (
                 <div className="mt-6 space-y-4">
                   <div>
@@ -265,7 +294,7 @@ const ProductDetails = () => {
                             key={v._id}
                             onClick={() => {
                               setSelectedVariant(v);
-                              setQuantity(1); // Reset qty to 1 on variant change
+                              setQuantity(1);
                             }}
                             className={`px-4 py-2 rounded-xl border text-sm font-medium transition cursor-pointer flex items-center gap-2 ${
                               isSelected 
@@ -326,15 +355,29 @@ const ProductDetails = () => {
                   </button>
                 </div>
 
-                {/* Add to Cart Button */}
-                <button
-                  onClick={handleAddToCart}
-                  disabled={stockLimit < 1 || isAddingToCart}
-                  className="flex-1 py-3.5 px-8 cursor-pointer bg-brand text-white font-semibold rounded-2xl hover:bg-brand/90 transition shadow-lg shadow-brand/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  <FiShoppingBag />
-                  {isAddingToCart ? "Adding..." : stockLimit < 1 ? "Out of Stock" : "Add to Cart"}
-                </button>
+                {/* CTA Action Buttons */}
+                <div className="flex-1 flex flex-col sm:flex-row gap-3">
+                  {/* Add to Cart Button */}
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={stockLimit < 1 || isAddingToCart}
+                    className="flex-1 py-3.5 px-6 cursor-pointer bg-brand text-white font-semibold rounded-2xl hover:bg-brand/90 transition shadow-lg shadow-brand/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <FiShoppingBag />
+                    {isAddingToCart ? "Adding..." : "Add to Cart"}
+                  </button>
+
+                  {/* Order Now Button */}
+                  <button
+                    onClick={handleOrderNow}
+                    disabled={stockLimit < 1 || isAddingToCart}
+                    className="flex-1 py-3.5 px-6 cursor-pointer bg-emerald-600 text-white font-semibold rounded-2xl hover:bg-emerald-700 transition shadow-lg shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <FiZap />
+                    Order Now
+                  </button>
+                </div>
+
               </div>
 
               {/* View Cart Quick Link */}
