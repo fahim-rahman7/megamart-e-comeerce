@@ -1,31 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { CiSearch, CiShoppingCart } from "react-icons/ci";
 import { FaBars, FaRegUser, FaWindowClose } from "react-icons/fa";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router"; // Added useSearchParams
 import { useGetCategoryListQuery, useGetProfileQuery } from "../../service/api";
 import Logout from "../../pages/Logout";
 
 const Navbar = () => {
   const [openDropDown, setOpenDropDown] = useState("");
-  const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Fetch Categories
+  // 1. Sync search state with URL query parameter
+  const [searchParams] = useSearchParams();
+  const urlSearchQuery = searchParams.get("search") || "";
+  const [search, setSearch] = useState(urlSearchQuery);
+
+  useEffect(() => {
+    setSearch(urlSearchQuery);
+  }, [urlSearchQuery]);
+
+  // Fetch Categories & Profile
   const { data: categoryData } = useGetCategoryListQuery();
   const categories = Array.isArray(categoryData) ? categoryData : categoryData?.categories || [];
-
-  // Check if user has an auth cookie before making the request
-  // const hasAuthToken = document.cookie.includes("acc_tkn=");
-
-  // Skip request if no token exists to avoid 401 console error
   const { data: profile } = useGetProfileQuery();
 
-  // Search Handler
-  const handleSearch = (e) => {
-    if (e.key === "Enter" && search.trim()) {
+  // 2. Form submission handler for both Enter key and Search Icon click
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (search.trim()) {
       navigate(`/shop?search=${encodeURIComponent(search.trim())}`);
       setIsOpen(false);
+    } else {
+      // Navigating to /shop without search parameter if input is cleared
+      navigate("/shop");
     }
   };
 
@@ -48,17 +55,21 @@ const Navbar = () => {
             </div>
 
             {/* Desktop SearchBar */}
-            <div className="hidden md:flex gap-2.5 items-center p-4 bg-[#F3F9FB] rounded-xl w-full max-w-lg">
-              <CiSearch className="text-brand text-2xl" />
+            <form 
+              onSubmit={handleSearchSubmit}
+              className="hidden md:flex gap-2.5 items-center p-4 bg-[#F3F9FB] rounded-xl w-full max-w-lg"
+            >
+              <button type="submit" className="focus:outline-none">
+                <CiSearch className="text-brand text-2xl cursor-pointer hover:scale-110 transition-transform" />
+              </button>
               <input
                 className="text-primary w-full text-base outline-0 bg-transparent"
                 type="text"
                 placeholder="Search products..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={handleSearch}
               />
-            </div>
+            </form>
 
             {/* Icons / Profile Section */}
             <div className="flex items-center gap-5 font-bold text-base text-primary">
@@ -98,17 +109,21 @@ const Navbar = () => {
           </div>
 
           {/* Mobile SearchBar */}
-          <div className="flex md:hidden gap-2.5 items-center mt-6 p-4 bg-[#F3F9FB] rounded-xl w-full">
-            <CiSearch className="text-brand text-2xl" />
+          <form 
+            onSubmit={handleSearchSubmit}
+            className="flex md:hidden gap-2.5 items-center mt-6 p-4 bg-[#F3F9FB] rounded-xl w-full"
+          >
+            <button type="submit" className="focus:outline-none">
+              <CiSearch className="text-brand text-2xl cursor-pointer" />
+            </button>
             <input
               className="text-primary w-full text-base outline-0 bg-transparent"
               type="text"
               placeholder="Search products..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={handleSearch}
             />
-          </div>
+          </form>
         </div>
       </nav>
 

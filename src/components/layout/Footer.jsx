@@ -1,8 +1,8 @@
 import React from "react";
 import { BsWhatsapp } from "react-icons/bs";
 import { PiPhone } from "react-icons/pi";
-import { Link } from "react-router"; 
-import { useGetCategoryListQuery } from "../../service/api"; 
+import { Link } from "react-router";
+import { useGetCategoryListQuery } from "../../service/api";
 
 const Footer = () => {
   const { data: categories, isLoading } = useGetCategoryListQuery();
@@ -11,16 +11,17 @@ const Footer = () => {
     <footer className="bg-brand pt-20">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          
           {/* 1. Contact Section */}
           <div>
-            <img src="/Logo-theme.png" alt="Logo-theme" />
+            <Link to="/">
+              <img src="/Logo-theme.png" alt="Logo-theme" />
+            </Link>
             <h2 className="text-theme font-bold text-xl mt-9">Contact Us</h2>
-            
+
             {/* WhatsApp Link */}
-            <a 
-              href="https://wa.me/12029182132" 
-              target="_blank" 
+            <a
+              href="https://wa.me/12029182132"
+              target="_blank"
               rel="noopener noreferrer"
               className="text-theme mt-5 flex gap-3 hover:opacity-80 transition-opacity cursor-pointer w-fit"
             >
@@ -32,8 +33,8 @@ const Footer = () => {
             </a>
 
             {/* Phone Call Link */}
-            <a 
-              href="tel:+12029182132" 
+            <a
+              href="tel:+12029182132"
               className="text-theme mt-5 flex gap-3 hover:opacity-80 transition-opacity cursor-pointer w-fit"
             >
               <PiPhone className="text-xl" />
@@ -44,25 +45,33 @@ const Footer = () => {
             </a>
 
             <h3 className="text-theme mt-5 font-bold text-xl">Download App</h3>
-            
+
             {/* App Store Links */}
             <div className="flex gap-5 mt-5">
-              <a 
-                href="https://www.apple.com/app-store/" 
-                target="_blank" 
+              <a
+                href="https://www.apple.com/app-store/"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="hover:opacity-80 transition-opacity hover:-translate-y-1 transform duration-300"
               >
-                <img src="/Footer-1.png" alt="App Store" className="cursor-pointer" />
+                <img
+                  src="/Footer-1.png"
+                  alt="App Store"
+                  className="cursor-pointer"
+                />
               </a>
-              
-              <a 
-                href="https://play.google.com/store" 
-                target="_blank" 
+
+              <a
+                href="https://play.google.com/store"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="hover:opacity-80 transition-opacity hover:-translate-y-1 transform duration-300"
               >
-                <img src="/Footer-2.png" alt="Google Play" className="cursor-pointer" />
+                <img
+                  src="/Footer-2.png"
+                  alt="Google Play"
+                  className="cursor-pointer"
+                />
               </a>
             </div>
           </div>
@@ -72,15 +81,15 @@ const Footer = () => {
             <h3 className="font-semibold text-xl pb-4 border-b-2 w-fit border-theme/30">
               Most Popular Categories
             </h3>
-            
+
             {isLoading ? (
               <p className="mt-5 text-theme/70">Loading categories...</p>
             ) : (
               <ul className="mt-5 list-disc pl-6 space-y-4">
                 {categories?.slice(0, 8).map((cat) => (
                   <li key={cat._id || cat.id}>
-                    <Link 
-                      to={`/shop?category=${cat.slug}`} 
+                    <Link
+                      to={`/shop?category=${cat.slug}`}
                       className="hover:opacity-80 transition-opacity"
                     >
                       {cat.title}
@@ -98,28 +107,54 @@ const Footer = () => {
             </h3>
             <ul className="mt-5 list-disc pl-6 space-y-4">
               <li>
-                <Link to="/about" className="hover:opacity-80 transition-opacity">About Us</Link>
+                <Link
+                  to="/about"
+                  className="hover:opacity-80 transition-opacity"
+                >
+                  About Us
+                </Link>
               </li>
               <li>
-                <Link to="/terms" className="hover:opacity-80 transition-opacity">Terms & Conditions</Link>
+                <Link
+                  to="/terms"
+                  className="hover:opacity-80 transition-opacity"
+                >
+                  Terms & Conditions
+                </Link>
               </li>
               <li>
-                <Link to="/faq" className="hover:opacity-80 transition-opacity">FAQ</Link>
+                <Link to="/faq" className="hover:opacity-80 transition-opacity">
+                  FAQ
+                </Link>
               </li>
               <li>
-                <Link to="/privacy-policy" className="hover:opacity-80 transition-opacity">Privacy Policy</Link>
+                <Link
+                  to="/privacy-policy"
+                  className="hover:opacity-80 transition-opacity"
+                >
+                  Privacy Policy
+                </Link>
               </li>
               <li>
-                <Link to="/profile" className="hover:opacity-80 transition-opacity">My Account</Link>
+                <Link
+                  to="/profile"
+                  className="hover:opacity-80 transition-opacity"
+                >
+                  My Account
+                </Link>
               </li>
               <li>
-                <Link to="/cart" className="hover:opacity-80 transition-opacity">My Cart</Link>
+                <Link
+                  to="/cart"
+                  className="hover:opacity-80 transition-opacity"
+                >
+                  My Cart
+                </Link>
               </li>
             </ul>
           </div>
-
         </div>
-        
+
         {/* Copyright */}
         <div>
           <h4 className="text-theme text-center py-7 border-t-2 mt-20 border-theme/20 text-sm">
