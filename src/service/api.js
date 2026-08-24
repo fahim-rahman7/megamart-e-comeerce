@@ -250,7 +250,7 @@ export const API = createApi({
           console.error("Login failed:", error);
         }
       },
-      invalidatesTags: ['Profile', 'Cart'],
+      // invalidatesTags: ['Profile', 'Cart'],
     }),
 
     // POST /auth/signup

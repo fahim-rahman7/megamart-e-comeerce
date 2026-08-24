@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { useDispatch } from "react-redux"; // 1. Import useDispatch
 import Input from "../components/ui/Input";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
-import { useLoginMutation } from "../service/api";
+import { useLoginMutation, API } from "../service/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -10,6 +11,7 @@ const LogIn = () => {
   const [login, { isLoading }] = useLoginMutation();
   const [passToggle, setPassToggle] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch(); // 3. Initialize dispatch
 
   const [loginData, setLoginData] = useState({
     email: "",
@@ -33,22 +35,36 @@ const LogIn = () => {
 
     try {
       const res = await login(loginData).unwrap();
+      // Step A: Save token synchronously FIRST
+      if (res?.accToken) {
+        localStorage.setItem("acc_tkn", res.accToken);
+      }
+
+      // Step B: Now tell RTK Query to fetch Profile & Cart (token is guaranteed in localStorage)
+      dispatch(API.util.invalidateTags(["Profile", "Cart"]));
 
       toast.success(res.message || "Logged in successfully!");
 
-      setTimeout(() => {
+
         navigate("/profile");
-      }, 1000);
+
     } catch (err) {
       const errorMsg = err?.data?.message || "Login failed. Please try again.";
       const lowerMsg = errorMsg.toLowerCase();
 
       // Check for specific input field validation errors
-      const isEmailRequired = lowerMsg.includes("email is required") || lowerMsg.includes("email required");
-      const isEmailInvalid = lowerMsg.includes("email is not valid") || lowerMsg.includes("email not valid");
-      const isPasswordRequired = lowerMsg.includes("password is required") || lowerMsg.includes("password required");
+      const isEmailRequired =
+        lowerMsg.includes("email is required") ||
+        lowerMsg.includes("email required");
+      const isEmailInvalid =
+        lowerMsg.includes("email is not valid") ||
+        lowerMsg.includes("email not valid");
+      const isPasswordRequired =
+        lowerMsg.includes("password is required") ||
+        lowerMsg.includes("password required");
 
-      const isFieldError = isEmailRequired || isEmailInvalid || isPasswordRequired;
+      const isFieldError =
+        isEmailRequired || isEmailInvalid || isPasswordRequired;
 
       if (isFieldError) {
         // Show ONLY inline field errors (No Toastify)
@@ -118,18 +134,26 @@ const LogIn = () => {
               />
             )}
             {fieldErrors.password && (
-              <p className="text-xs text-red-500 mt-1">{fieldErrors.password}</p>
+              <p className="text-xs text-red-500 mt-1">
+                {fieldErrors.password}
+              </p>
             )}
           </div>
 
           <div className="flex items-center justify-between flex-wrap">
             <p className="text-primary mt-2">
               Don't have an account?{" "}
-              <Link className="text-sm text-blue-500 hover:underline" to="/registration">
+              <Link
+                className="text-sm text-blue-500 hover:underline"
+                to="/registration"
+              >
                 Sign up
               </Link>
             </p>
-            <Link className="text-sm text-blue-500 hover:underline mt-2" to="/forget-password">
+            <Link
+              className="text-sm text-blue-500 hover:underline mt-2"
+              to="/forget-password"
+            >
               Forgot password?
             </Link>
           </div>
