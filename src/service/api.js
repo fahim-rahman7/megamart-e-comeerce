@@ -1,11 +1,21 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import {
+  createApi,
+  fetchBaseQuery
+} from '@reduxjs/toolkit/query/react';
 
 export const API = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001',
-    // Ensures browser cookies (acc_tkn, ref_tkn) are sent automatically
     credentials: 'include',
+    // Attaches stored token to every request header
+    prepareHeaders: (headers) => {
+      const token = localStorage.getItem('acc_tkn');
+      if (token) {
+        headers.set('authorization', `Bearer ${token}`);
+      }
+      return headers;
+    },
   }),
   tagTypes: ['Product', 'Category', 'Cart', 'Profile', 'Order'],
   endpoints: (build) => ({
@@ -16,7 +26,13 @@ export const API = createApi({
 
     // GET /product/allProduct
     getProducts: build.query({
-      query: ({ limit = 10, page = 1, category, search, hasDiscount } = {}) => {
+      query: ({
+        limit = 10,
+        page = 1,
+        category,
+        search,
+        hasDiscount
+      } = {}) => {
         let url = `/product/allProduct?limit=${limit}&page=${page}`;
         if (category) url += `&category=${encodeURIComponent(category)}`;
         if (search) url += `&search=${encodeURIComponent(search)}`;
@@ -29,7 +45,10 @@ export const API = createApi({
     // GET /product/:slug
     getProductDetails: build.query({
       query: (slug) => `/product/${slug}`,
-      providesTags: (result, error, slug) => [{ type: 'Product', id: slug }],
+      providesTags: (result, error, slug) => [{
+        type: 'Product',
+        id: slug
+      }],
     }),
 
     // POST /product/create (Multipart Form Data)
@@ -44,12 +63,20 @@ export const API = createApi({
 
     // PUT /product/update/:slug (Multipart Form Data)
     updateProduct: build.mutation({
-      query: ({ slug, formData }) => ({
+      query: ({
+        slug,
+        formData
+      }) => ({
         url: `/product/update/${slug}`,
         method: 'PUT',
         body: formData,
       }),
-      invalidatesTags: (result, error, { slug }) => ['Product', { type: 'Product', id: slug }],
+      invalidatesTags: (result, error, {
+        slug
+      }) => ['Product', {
+        type: 'Product',
+        id: slug
+      }],
     }),
 
     // =========================================================================
@@ -74,7 +101,10 @@ export const API = createApi({
 
     // PATCH /category/update/:id (Multipart Form Data)
     updateCategory: build.mutation({
-      query: ({ id, formData }) => ({
+      query: ({
+        id,
+        formData
+      }) => ({
         url: `/category/update/${id}`,
         method: 'PATCH',
         body: formData,
@@ -111,7 +141,7 @@ export const API = createApi({
       invalidatesTags: ['Cart'],
     }),
 
-// PUT /cart/updateCart
+    // PUT /cart/updateCart
     updateCart: build.mutation({
       query: (cartData) => ({
         url: '/cart/updateCart',
@@ -119,24 +149,30 @@ export const API = createApi({
         body: cartData,
       }),
       // Keep this so the app guarantees full synchronization with the backend eventually
-      invalidatesTags: ['Cart'], 
-      
+      invalidatesTags: ['Cart'],
+
       // Add this Optimistic Update logic
-      async onQueryStarted({ itemId, quantity }, { dispatch, queryFulfilled }) {
+      async onQueryStarted({
+        itemId,
+        quantity
+      }, {
+        dispatch,
+        queryFulfilled
+      }) {
         // 1. Dispatch an update to the cached 'getCart' data instantly
         const patchResult = dispatch(
           API.util.updateQueryData('getCart', undefined, (draft) => {
             // Find the specific item in our cached cart draft
             const item = draft.cartData?.items?.find((i) => i._id === itemId);
-            
+
             if (item) {
               // Calculate the unit price based on existing subtotal & quantity
               const unitPrice = item.subtotal / item.quantity;
-              
+
               // Apply the new quantity and recalculate subtotal instantly
               item.quantity = quantity;
               item.subtotal = unitPrice * quantity;
-              
+
               // Recalculate total items across the whole cart
               if (draft.cartData?.items) {
                 draft.cartData.totalItems = draft.cartData.items.reduce(
@@ -147,7 +183,7 @@ export const API = createApi({
             }
           })
         );
-        
+
         try {
           // 2. Wait for the actual backend PUT request to complete
           await queryFulfilled;
@@ -199,6 +235,21 @@ export const API = createApi({
         method: 'POST',
         body: userData,
       }),
+      // Saves token to localStorage automatically when login succeeds
+      async onQueryStarted(args, {
+        queryFulfilled
+      }) {
+        try {
+          const {
+            data
+          } = await queryFulfilled;
+          if (data?.accToken) {
+            localStorage.setItem('acc_tkn', data.accToken);
+          }
+        } catch (error) {
+          console.error("Login failed:", error);
+        }
+      },
       invalidatesTags: ['Profile', 'Cart'],
     }),
 
@@ -240,10 +291,15 @@ export const API = createApi({
 
     // POST /auth/reset-pass/:token
     resetPassword: build.mutation({
-      query: ({ token, newPass }) => ({
+      query: ({
+        token,
+        newPass
+      }) => ({
         url: `/auth/reset-pass/${token}`,
         method: 'POST',
-        body: { newPass },
+        body: {
+          newPass
+        },
       }),
     }),
 
@@ -265,7 +321,11 @@ export const API = createApi({
 
     // GET /auth/userlist (Admin/Moderator)
     getUserList: build.query({
-      query: ({ verified, limit = 10, page = 1 } = {}) => {
+      query: ({
+        verified,
+        limit = 10,
+        page = 1
+      } = {}) => {
         let url = `/auth/userlist?limit=${limit}&page=${page}`;
         if (verified !== undefined) url += `&verified=${verified}`;
         return url;
