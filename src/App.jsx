@@ -15,6 +15,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // ⚠️ ADD THIS CSS IMPORT
 import MyOrders from "./pages/MyOrders";
 import NotFound from "./pages/NotFound";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   return (
@@ -34,6 +36,8 @@ function App() {
             <Route path="/shop/:id" element={<ProductDetails/>}/>
             <Route path="/cart" element={<Cart/>}/>
             <Route path="/verify-email" element={<VerifyEmail/>}/>
+            <Route path="/forget-password" element={<ForgotPassword />} />
+            <Route path="/auth/reset-pass/:token" element={<ResetPassword />} />
             <Route path="/order" element={<Order/>}/>
             <Route path="/orders" element={<MyOrders/>}/>
             <Route path="*" element={<NotFound />} />
