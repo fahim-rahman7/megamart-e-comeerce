@@ -21,6 +21,7 @@ import {
   FiTruck,
   FiCheckCircle,
   FiClock,
+  FiPhone, // Added FiPhone icon
 } from "react-icons/fi";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -40,6 +41,7 @@ const Profile = () => {
   // Local States for Editing
   const [isEditing, setIsEditing] = useState(false);
   const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState(""); // Added phone state
   const [address, setAddress] = useState("");
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState("");
@@ -49,20 +51,18 @@ const Profile = () => {
     cartRes?.cartData?.totalItems || cartRes?.cartData?.items?.length || 0;
   const orders = ordersRes?.data || ordersRes || [];
 
-  // Calculate order statuses based on your exact schema enums
   const pendingOrders = orders.filter((o) => o.status === "pending").length;
-  // Grouping confirmed and shipped as "Active/Processing" for the top summary
   const activeOrders = orders.filter(
     (o) => o.status === "confirmed" || o.status === "shipped"
   ).length;
   const deliveredOrders = orders.filter((o) => o.status === "delivered").length;
 
-  // Get top 3 recent orders for the quick list
   const recentOrders = orders.slice(0, 3);
 
   useEffect(() => {
     if (profileData) {
       setFullName(profileData.fullName || "");
+      setPhone(profileData.phone || ""); // Populate phone state
       setAddress(
         typeof profileData.address === "string"
           ? profileData.address
@@ -87,6 +87,7 @@ const Profile = () => {
     e.preventDefault();
     const formData = new FormData();
     formData.append("fullName", fullName);
+    formData.append("phone", phone); // Append phone to form data
     formData.append("address", address);
     if (avatarFile) {
       formData.append("avatar", avatarFile);
@@ -106,6 +107,7 @@ const Profile = () => {
   const handleCancel = () => {
     setIsEditing(false);
     setFullName(profileData.fullName || "");
+    setPhone(profileData.phone || ""); // Reset phone state on cancel
     setAddress(
       typeof profileData.address === "string"
         ? profileData.address
@@ -115,7 +117,6 @@ const Profile = () => {
     setAvatarFile(null);
   };
 
-  // Helper for dynamic status colors
   const getStatusColor = (status) => {
     switch (status) {
       case "pending":
@@ -168,6 +169,11 @@ const Profile = () => {
               <p className="text-gray-500 text-sm mt-1 flex items-center justify-center md:justify-start gap-1">
                 <FiMail className="text-gray-400" /> {profileData.email}
               </p>
+              {profileData.phone && (
+                <p className="text-gray-500 text-sm mt-1 flex items-center justify-center md:justify-start gap-1">
+                  <FiPhone className="text-gray-400" /> {profileData.phone}
+                </p>
+              )}
               <span className="mt-3 inline-flex items-center gap-1 bg-brand/10 text-brand px-3 py-1 rounded-full text-xs font-semibold capitalize">
                 <FiShield className="text-xs" /> {profileData.role || "User"}
               </span>
@@ -283,19 +289,42 @@ const Profile = () => {
                     Email Address
                   </label>
                   <div className="bg-gray-50 px-4 py-3 rounded-xl border border-gray-100 cursor-not-allowed flex justify-between items-center gap-3">
-                    {/* Email Text with Truncation */}
                     <span
                       className="font-medium text-gray-500 truncate"
                       title={profileData.email}
                     >
                       {profileData.email}
                     </span>
-
-                    {/* Read Only Badge - Fixed size */}
                     <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider bg-gray-200/80 text-gray-500 px-3 py-1 rounded-full">
                       Read Only
                     </span>
                   </div>
+                </div>
+                
+                {/* --- PHONE NUMBER INPUT BLOCK --- */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+                    <FiPhone /> Phone Number
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="Enter contact number..."
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-brand transition"
+                    />
+                  ) : (
+                    <div className="bg-gray-50 px-4 py-3 rounded-xl border border-gray-100">
+                      {profileData.phone ? (
+                        <p className="font-medium text-gray-800">
+                          {profileData.phone}
+                        </p>
+                      ) : (
+                        <p className="italic text-gray-400">Not added</p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 

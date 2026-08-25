@@ -35,6 +35,7 @@ const Order = () => {
   const isDirectOrder = Boolean(directOrderItem);
 
   // Form State
+  const [phone, setPhone] = useState("");
   const [shippingAddress, setShippingAddress] = useState("");
   const [insideDhaka, setInsideDhaka] = useState("true");
   const [paymentType, setPaymentType] = useState("card");
@@ -46,18 +47,23 @@ const Order = () => {
   // Determine checkout items source (Direct Order vs Cart)
   const checkoutItems = isDirectOrder ? [directOrderItem] : cartItems;
 
-  // Pre-fill shipping address when profileData loads
+  // Pre-fill phone and shipping address when profileData loads
   useEffect(() => {
-    if (profileData?.address) {
-      let formattedAddress = "";
-      if (typeof profileData.address === "string") {
-        formattedAddress = profileData.address;
-      } else {
-        const { street, address, city, postalCode } = profileData.address;
-        const streetPart = street || address || "";
-        formattedAddress = [streetPart, city, postalCode].filter(Boolean).join(", ");
+    if (profileData) {
+      if (profileData.phone) {
+        setPhone((prev) => prev || profileData.phone);
       }
-      setShippingAddress((prev) => prev || formattedAddress);
+      if (profileData.address) {
+        let formattedAddress = "";
+        if (typeof profileData.address === "string") {
+          formattedAddress = profileData.address;
+        } else {
+          const { street, address, city, postalCode } = profileData.address;
+          const streetPart = street || address || "";
+          formattedAddress = [streetPart, city, postalCode].filter(Boolean).join(", ");
+        }
+        setShippingAddress((prev) => prev || formattedAddress);
+      }
     }
   }, [profileData]);
 
@@ -90,6 +96,13 @@ const Order = () => {
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
 
+// Cast phone to string before checking trim()
+const formattedPhone = String(phone || "").trim();
+
+if (!formattedPhone) {
+  return toast.error("Please enter a valid contact number.");
+}
+
     if (!shippingAddress.trim()) {
       return toast.error("Please enter an address.");
     }
@@ -102,6 +115,7 @@ const Order = () => {
           productId: directOrderItem.product?._id || directOrderItem.productId,
           quantity: directOrderItem.quantity,
           sku: directOrderItem.sku || `SKU-${directOrderItem.product?._id}`,
+          phone,
           shippingAddress,
           insideDhaka,
           paymentType,
@@ -109,6 +123,7 @@ const Order = () => {
       } else {
         response = await cartCheckout({
           cartId: cart?._id,
+          phone,
           shippingAddress,
           insideDhaka,
           paymentType,
@@ -168,9 +183,23 @@ const Order = () => {
           {/* CHECKOUT FORM */}
           <div className="lg:w-2/3">
             <div className="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm">
-              <h2 className="text-xl font-bold mb-6 border-b pb-4">Shipping Details</h2>
+              <h2 className="text-xl font-bold mb-6 border-b pb-4">Shipping & Contact Details</h2>
 
               <form onSubmit={handlePlaceOrder} className="space-y-6">
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Phone / Contact Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="e.g. 01700000000"
+                    className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-brand focus:border-brand outline-none transition"
+                  />
+                </div>
+
                 <div>
                   <label className="block text-gray-700 font-medium mb-2">
                     Complete Shipping Address <span className="text-red-500">*</span>
