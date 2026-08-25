@@ -17,7 +17,7 @@ const Order = () => {
   const { data, isLoading } = useGetCartQuery();
   const { data: profileData } = useGetProfileQuery();
 
-  // 1. Hook initializations
+  // Hook initializations
   const [cartCheckout, { isLoading: isCartCheckingOut }] = useCartCheckoutMutation();
   const [directCheckout, { isLoading: isDirectCheckingOut }] = useDirectCheckoutMutation();
   const [removeFromCart] = useRemoveFromCartMutation();
@@ -61,12 +61,32 @@ const Order = () => {
     }
   }, [profileData]);
 
+  // Handle closing modal and immediate navigation
+  const handleModalClose = () => {
+    if (isDirectOrder) {
+      sessionStorage.removeItem("directOrderItem");
+    }
+    setIsSuccessModalOpen(false);
+    navigate("/shop");
+  };
+
+  // Optional 5-second auto-redirect if modal isn't manually closed
+  useEffect(() => {
+    let timer;
+    if (isSuccessModalOpen) {
+      timer = setTimeout(() => {
+        handleModalClose();
+      }, 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [isSuccessModalOpen]);
+
   // Calculations derived from checkoutItems
   const subtotal = checkoutItems.reduce((sum, item) => sum + (item.subtotal || 0), 0);
   const deliveryCharge = insideDhaka === "true" ? 80 : 120;
   const totalAmount = subtotal + deliveryCharge;
 
-  // 2. Updated Order Submission Handler
+  // Order Submission Handler
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
 
@@ -78,7 +98,6 @@ const Order = () => {
       let response;
 
       if (isDirectOrder) {
-        // Direct Checkout Endpoint Call
         response = await directCheckout({
           productId: directOrderItem.product?._id || directOrderItem.productId,
           quantity: directOrderItem.quantity,
@@ -88,7 +107,6 @@ const Order = () => {
           paymentType,
         }).unwrap();
       } else {
-        // Cart Checkout Endpoint Call
         response = await cartCheckout({
           cartId: cart?._id,
           shippingAddress,
@@ -102,14 +120,6 @@ const Order = () => {
         window.location.href = response.url;
       } else {
         setIsSuccessModalOpen(true);
-
-        if (isDirectOrder) {
-          sessionStorage.removeItem("directOrderItem");
-        }
-
-        setTimeout(() => {
-          navigate("/shop");
-        }, 5000);
       }
     } catch (err) {
       console.error("Checkout error:", err);
@@ -128,8 +138,8 @@ const Order = () => {
     );
   }
 
-  // Display empty guard only if neither direct order nor cart items exist
-  if (!checkoutItems.length) {
+  // Prevent displaying empty cart layout when success modal is open
+  if (!checkoutItems.length && !isSuccessModalOpen) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <h2 className="text-2xl font-bold mb-4">Your cart is empty</h2>
@@ -146,7 +156,7 @@ const Order = () => {
 
       <OrderSuccessModal
         isOpen={isSuccessModalOpen}
-        onClose={() => setIsSuccessModalOpen(false)}
+        onClose={handleModalClose}
       />
 
       <div className="container mx-auto px-4">
