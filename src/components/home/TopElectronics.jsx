@@ -71,7 +71,7 @@ const TopElectronics = () => {
             to="/shop?category=electronics"
             className="group flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm font-semibold text-brand bg-brand/10 hover:bg-brand hover:text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full transition-all duration-200 shrink-0 shadow-xs"
           >
-            <span>View All</span>
+            {/* <span>View All</span> */}
             <FiArrowRight className="text-xs sm:text-sm transition-transform duration-200 group-hover:translate-x-1" />
           </Link>
         </div>
