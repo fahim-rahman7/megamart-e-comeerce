@@ -1,48 +1,81 @@
 import React from "react";
 import { Link, useSearchParams } from "react-router";
 import { useGetCategoryListQuery } from "../../service/api";
+import { FiX } from "react-icons/fi";
 
 const ShopSidebar = () => {
   const { data, isLoading } = useGetCategoryListQuery();
   const [searchParams] = useSearchParams();
   const activeCategory = searchParams.get("category");
 
-  if (isLoading) return <p className="text-gray-500">Loading categories...</p>;
+  if (isLoading) {
+    return (
+      <div className="bg-white p-3 sm:p-4 md:p-5 rounded-2xl border border-gray-100 shadow-sm w-full animate-pulse">
+        <div className="h-5 bg-gray-200 rounded-md w-24 mb-3 sm:mb-4"></div>
+        <div className="flex md:flex-col gap-2 overflow-x-auto pb-2 md:pb-0">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <div
+              key={n}
+              className="h-8 bg-gray-100 rounded-full md:rounded-lg w-20 md:w-full shrink-0"
+            ></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
-  // Depending on how your controller sends the list, it might be in `data` or `data.categories`
   const categories = Array.isArray(data) ? data : data?.categories || [];
 
   return (
-    <div className="bg-white p-4 lg:p-5 md:p-6 rounded-xl shadow w-full min-w-[180px]">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg lg:text-xl font-semibold">Categories</h3>
-        
-        {/* Option to clear category filter */}
+    <div className="bg-white p-3 sm:p-4 md:p-5 rounded-2xl border border-gray-100 shadow-sm w-full">
+      {/* Header & Clear Filter Link */}
+      <div className="flex items-center justify-between mb-2.5 sm:mb-4">
+        <h3 className="text-sm sm:text-base md:text-lg font-bold text-gray-900">
+          Categories
+        </h3>
+
         {activeCategory && (
-          <Link to="/shop" className="text-xs text-red-500 hover:underline">
-            Clear
+          <Link
+            to="/shop"
+            className="inline-flex items-center gap-1 text-xs text-red-500 hover:text-red-600 font-medium transition"
+          >
+            <span>Clear Filter</span>
+            <FiX className="text-xs" />
           </Link>
         )}
       </div>
 
-      <ul className="flex flex-col gap-2 lg:gap-3">
+      {/* Category List: Horizontal Scroll (Mobile) -> Vertical Stack (Desktop) */}
+      <ul className="flex md:flex-col gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none scroll-smooth">
+        {/* Default 'All Products' Chip */}
+        <li className="shrink-0 md:shrink">
+          <Link
+            to="/shop"
+            className={`block px-3.5 py-1.5 md:px-3 md:py-2 rounded-full md:rounded-xl text-xs sm:text-sm font-medium transition whitespace-nowrap ${
+              !activeCategory
+                ? "bg-brand text-white font-semibold shadow-sm md:bg-brand/10 md:text-brand"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200 md:bg-transparent md:hover:bg-gray-50 md:hover:text-brand"
+            }`}
+          >
+            All Products
+          </Link>
+        </li>
+
         {categories.length > 0 ? (
           categories.map((item) => {
-            // Check for Mongoose _id or fallback to standard id/name
             const id = item._id || item.id;
             const title = item.title || item.name;
-            const slug = item.slug || title; // Use slug for URL if available
-
+            const slug = item.slug || title;
             const isActive = activeCategory === slug;
 
             return (
-              <li key={id}>
+              <li key={id} className="shrink-0 md:shrink">
                 <Link
                   to={`/shop?category=${encodeURIComponent(slug)}`}
-                  className={`block text-sm lg:text-base font-medium transition ${
-                    isActive 
-                      ? "text-blue-600 font-bold" 
-                      : "text-primary hover:text-blue-500"
+                  className={`block px-3.5 py-1.5 md:px-3 md:py-2 rounded-full md:rounded-xl text-xs sm:text-sm font-medium transition whitespace-nowrap ${
+                    isActive
+                      ? "bg-brand text-white font-semibold shadow-sm md:bg-brand/10 md:text-brand"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200 md:bg-transparent md:hover:bg-gray-50 md:hover:text-brand"
                   }`}
                 >
                   {title}
@@ -51,7 +84,7 @@ const ShopSidebar = () => {
             );
           })
         ) : (
-          <li className="text-sm text-gray-400">No categories found</li>
+          <li className="text-xs text-gray-400 py-1">No categories found</li>
         )}
       </ul>
     </div>

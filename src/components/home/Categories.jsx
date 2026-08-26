@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router";
 import { useGetCategoryListQuery } from "../../service/api";
-// 1. Import your new loading component (adjust the path if needed)
 import CategoryLoading from "../ui/CategoryLoading"; 
+import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 const Categories = () => {
   const { data, isLoading } = useGetCategoryListQuery();
@@ -20,57 +20,68 @@ const Categories = () => {
   // Determine which categories to display based on state
   const displayedCategories = showAll ? filteredCategories : filteredCategories.slice(0, 8);
 
+  const gridClassNames = "grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4 lg:gap-5";
+
   return (
-    <section className="pb-32">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center pb-4 border-b border-primary/20 relative after:absolute after:w-100 after:rounded-full after:bottom-0 after:left-0 after:h-1 after:bg-brand">
-          <h2 className="heading">
-            Shop From <span> Top Categories</span>
+    <section className="py-6 sm:py-10 lg:py-14">
+      <div className="container mx-auto px-3 sm:px-4">
+        {/* Section Header */}
+        <div className="flex items-center justify-between gap-2 pb-3 sm:pb-4 border-b border-gray-100 relative after:absolute after:w-20 sm:after:w-28 after:rounded-full after:bottom-0 after:left-0 after:h-1 after:bg-brand">
+          <h2 className="text-base sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">
+            Shop From <span className="text-brand">Top Categories</span>
           </h2>
+
+          {/* Redesigned Toggle Button */}
           <button 
             onClick={() => setShowAll(!showAll)} 
-            className="hover:text-brand font-medium transition cursor-pointer"
+            className="group flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm font-semibold text-brand bg-brand/10 hover:bg-brand hover:text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full transition-all duration-200 shrink-0 shadow-xs cursor-pointer"
           >
-            {showAll ? "Show Less" : "View All"}
+            <span>{showAll ? "Show Less" : "View All"}</span>
+            {showAll ? (
+              <FiChevronUp className="text-xs sm:text-sm transition-transform duration-200 group-hover:-translate-y-0.5" />
+            ) : (
+              <FiChevronDown className="text-xs sm:text-sm transition-transform duration-200 group-hover:translate-y-0.5" />
+            )}
           </button>
         </div>
 
-        {isLoading ? (
-          // 2. Use CategoryLoading with 8 items and the exact grid classes used below
-          <CategoryLoading 
-            count={8} 
-            className="mt-15 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4" 
-          />
-        ) : (
-          <div className="mt-15 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
-            {displayedCategories.map((item) => {
-              const id = item._id || item.id || item;
-              const title = item.title || item.name || item;
-              const slug = item.slug || (typeof item === 'string' ? item : title);
-              const image = item.image || item.thumbnail || "/category-1.png";
+        {/* Categories Content */}
+        <div className="mt-5 sm:mt-8 lg:mt-10">
+          {isLoading ? (
+            <CategoryLoading 
+              count={8} 
+              className={gridClassNames} 
+            />
+          ) : (
+            <div className={gridClassNames}>
+              {displayedCategories.map((item) => {
+                const id = item._id || item.id || item;
+                const title = item.title || item.name || item;
+                const slug = item.slug || (typeof item === 'string' ? item : title);
+                const image = item.image || item.thumbnail || "/category-1.png";
 
-              return (
-                <Link
-                  to={`/shop?category=${encodeURIComponent(slug)}`}
-                  key={id}
-                >
-                  <div className="flex flex-col items-center gap-3 group">
-                    <div className="w-32 h-32 bg-primary/10 rounded-full flex justify-center items-center border border-transparent group-hover:border-brand group-hover:shadow-2xl transition-all duration-300 overflow-hidden">
+                return (
+                  <Link
+                    to={`/shop?category=${encodeURIComponent(slug)}`}
+                    key={id}
+                    className="group flex flex-col items-center gap-2 sm:gap-3"
+                  >
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 bg-primary/10 rounded-full flex justify-center items-center border border-transparent group-hover:border-brand group-hover:shadow-xl transition-all duration-300 overflow-hidden shrink-0">
                       <img
                         src={image}
                         alt={title}
-                        className="w-auto max-w-4/5 max-h-4/5 object-contain mix-blend-multiply"
+                        className="w-auto max-w-[75%] max-h-[75%] object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
-                    <h3 className="text-base font-medium text-[#000000] capitalize group-hover:text-brand transition-colors">
+                    <h3 className="text-xs sm:text-sm lg:text-base font-semibold text-gray-900 capitalize group-hover:text-brand transition-colors text-center line-clamp-1">
                       {title}
                     </h3>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );
