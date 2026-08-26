@@ -96,12 +96,11 @@ const Order = () => {
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
 
-// Cast phone to string before checking trim()
-const formattedPhone = String(phone || "").trim();
+    const formattedPhone = String(phone || "").trim();
 
-if (!formattedPhone) {
-  return toast.error("Please enter a valid contact number.");
-}
+    if (!formattedPhone) {
+      return toast.error("Please enter a valid contact number.");
+    }
 
     if (!shippingAddress.trim()) {
       return toast.error("Please enter an address.");
@@ -145,8 +144,8 @@ if (!formattedPhone) {
   // Skip cart loading state if processing direct order
   if (isLoading && !isDirectOrder) {
     return (
-      <div className="flex justify-center items-center min-h-[60vh]">
-        <p className="text-xl text-gray-500 font-medium animate-pulse">
+      <div className="flex justify-center items-center min-h-[55vh] sm:min-h-[60vh]">
+        <p className="text-base sm:text-xl text-gray-500 font-medium animate-pulse">
           Loading checkout...
         </p>
       </div>
@@ -156,9 +155,9 @@ if (!formattedPhone) {
   // Prevent displaying empty cart layout when success modal is open
   if (!checkoutItems.length && !isSuccessModalOpen) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <h2 className="text-2xl font-bold mb-4">Your cart is empty</h2>
-        <Link to="/cart" className="text-brand hover:underline">
+      <div className="flex flex-col items-center justify-center min-h-[55vh] sm:min-h-[60vh] px-4 text-center">
+        <h2 className="text-xl sm:text-2xl font-bold mb-3 text-gray-900">Your cart is empty</h2>
+        <Link to="/cart" className="text-brand font-medium text-sm sm:text-base hover:underline">
           Go back to Cart
         </Link>
       </div>
@@ -166,7 +165,7 @@ if (!formattedPhone) {
   }
 
   return (
-    <section className="py-12 bg-gray-50 min-h-screen relative">
+    <section className="py-4 sm:py-8 lg:py-12 bg-gray-50 min-h-screen relative">
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
 
       <OrderSuccessModal
@@ -174,20 +173,25 @@ if (!formattedPhone) {
         onClose={handleModalClose}
       />
 
-      <div className="container mx-auto px-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">
+      <div className="container mx-auto px-3 sm:px-4">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-4 sm:mb-8">
           {isDirectOrder ? "Direct Checkout" : "Checkout"}
         </h1>
 
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-5 lg:gap-8 items-start">
+          
           {/* CHECKOUT FORM */}
-          <div className="lg:w-2/3">
-            <div className="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm">
-              <h2 className="text-xl font-bold mb-6 border-b pb-4">Shipping & Contact Details</h2>
+          <div className="w-full lg:w-2/3">
+            <div className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-6 lg:p-8 shadow-sm">
+              <h2 className="text-base sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6 border-b pb-3 sm:pb-4">
+                Shipping & Contact Details
+              </h2>
 
-              <form onSubmit={handlePlaceOrder} className="space-y-6">
+              <form onSubmit={handlePlaceOrder} className="space-y-4 sm:space-y-6">
+                
+                {/* Phone Field */}
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">
                     Phone / Contact Number <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -196,12 +200,13 @@ if (!formattedPhone) {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="e.g. 01700000000"
-                    className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-brand focus:border-brand outline-none transition"
+                    className="w-full border border-gray-300 rounded-xl p-2.5 sm:p-3 text-xs sm:text-sm focus:ring-2 focus:ring-brand focus:border-brand outline-none transition"
                   />
                 </div>
 
+                {/* Address Field */}
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">
                     Complete Shipping Address <span className="text-red-500">*</span>
                   </label>
                   <textarea
@@ -209,128 +214,134 @@ if (!formattedPhone) {
                     value={shippingAddress}
                     onChange={(e) => setShippingAddress(e.target.value)}
                     placeholder="House, Road, Block, Area, City..."
-                    className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-brand focus:border-brand outline-none transition"
+                    className="w-full border border-gray-300 rounded-xl p-2.5 sm:p-3 text-xs sm:text-sm focus:ring-2 focus:ring-brand focus:border-brand outline-none transition"
                     rows="3"
                   />
                 </div>
 
+                {/* Delivery Area Selection */}
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">
                     Delivery Area
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-4">
                     <label
-                      className={`border rounded-xl p-4 cursor-pointer transition ${
+                      className={`border rounded-xl p-3 sm:p-4 cursor-pointer transition ${
                         insideDhaka === "true" ? "border-brand bg-brand/5" : "border-gray-200"
                       }`}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2.5 sm:gap-3">
                         <input
                           type="radio"
                           name="area"
                           value="true"
                           checked={insideDhaka === "true"}
                           onChange={(e) => setInsideDhaka(e.target.value)}
-                          className="w-4 h-4 text-brand"
+                          className="w-4 h-4 text-brand accent-brand"
                         />
                         <div>
-                          <p className="font-semibold text-gray-900">Inside Dhaka</p>
-                          <p className="text-sm text-gray-500">Delivery Charge: ৳ 80</p>
+                          <p className="font-semibold text-gray-900 text-xs sm:text-sm">Inside Dhaka</p>
+                          <p className="text-[11px] sm:text-xs text-gray-500">Delivery Charge: ৳ 80</p>
                         </div>
                       </div>
                     </label>
+
                     <label
-                      className={`border rounded-xl p-4 cursor-pointer transition ${
+                      className={`border rounded-xl p-3 sm:p-4 cursor-pointer transition ${
                         insideDhaka === "false" ? "border-brand bg-brand/5" : "border-gray-200"
                       }`}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2.5 sm:gap-3">
                         <input
                           type="radio"
                           name="area"
                           value="false"
                           checked={insideDhaka === "false"}
                           onChange={(e) => setInsideDhaka(e.target.value)}
-                          className="w-4 h-4 text-brand"
+                          className="w-4 h-4 text-brand accent-brand"
                         />
                         <div>
-                          <p className="font-semibold text-gray-900">Outside Dhaka</p>
-                          <p className="text-sm text-gray-500">Delivery Charge: ৳ 120</p>
+                          <p className="font-semibold text-gray-900 text-xs sm:text-sm">Outside Dhaka</p>
+                          <p className="text-[11px] sm:text-xs text-gray-500">Delivery Charge: ৳ 120</p>
                         </div>
                       </div>
                     </label>
                   </div>
                 </div>
 
+                {/* Payment Method Selection */}
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2 mt-4">
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 pt-1">
                     Payment Method
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-4">
                     <label
-                      className={`border rounded-xl p-4 cursor-pointer transition ${
+                      className={`border rounded-xl p-3 sm:p-4 cursor-pointer transition ${
                         paymentType === "card" ? "border-brand bg-brand/5" : "border-gray-200"
                       }`}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2.5 sm:gap-3">
                         <input
                           type="radio"
                           name="payment"
                           value="card"
                           checked={paymentType === "card"}
                           onChange={(e) => setPaymentType(e.target.value)}
-                          className="w-4 h-4 text-brand"
+                          className="w-4 h-4 text-brand accent-brand"
                         />
                         <div>
-                          <p className="font-semibold text-gray-900">Online Payment</p>
-                          <p className="text-sm text-gray-500">Pay securely via Stripe</p>
+                          <p className="font-semibold text-gray-900 text-xs sm:text-sm">Online Payment</p>
+                          <p className="text-[11px] sm:text-xs text-gray-500">Pay securely via Stripe</p>
                         </div>
                       </div>
                     </label>
+
                     <label
-                      className={`border rounded-xl p-4 cursor-pointer transition ${
+                      className={`border rounded-xl p-3 sm:p-4 cursor-pointer transition ${
                         paymentType === "cash" ? "border-brand bg-brand/5" : "border-gray-200"
                       }`}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2.5 sm:gap-3">
                         <input
                           type="radio"
                           name="payment"
                           value="cash"
                           checked={paymentType === "cash"}
                           onChange={(e) => setPaymentType(e.target.value)}
-                          className="w-4 h-4 text-brand"
+                          className="w-4 h-4 text-brand accent-brand"
                         />
                         <div>
-                          <p className="font-semibold text-gray-900">Cash on Delivery</p>
-                          <p className="text-sm text-gray-500">Pay when you receive it</p>
+                          <p className="font-semibold text-gray-900 text-xs sm:text-sm">Cash on Delivery</p>
+                          <p className="text-[11px] sm:text-xs text-gray-500">Pay when you receive it</p>
                         </div>
                       </div>
                     </label>
                   </div>
                 </div>
+
               </form>
             </div>
           </div>
 
           {/* FINAL ORDER SUMMARY */}
-          <div className="lg:w-1/3">
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm sticky top-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-6 border-b border-gray-100 pb-4">
+          <div className="w-full lg:w-1/3">
+            <div className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-6 shadow-sm lg:sticky lg:top-8">
+              <h3 className="text-base sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6 border-b border-gray-100 pb-3 sm:pb-4">
                 Your Order
               </h3>
 
-              <div className="space-y-3 mb-6 max-h-[300px] overflow-y-auto pr-2">
+              {/* Items List */}
+              <div className="space-y-2.5 mb-4 sm:mb-6 max-h-[220px] sm:max-h-[300px] overflow-y-auto pr-1 sm:pr-2">
                 {checkoutItems.map((item, idx) => (
                   <div
                     key={item._id || idx}
-                    className="flex justify-between items-center text-sm border-b border-gray-50 pb-2"
+                    className="flex justify-between items-center text-xs sm:text-sm border-b border-gray-50 pb-2"
                   >
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-800 line-clamp-1">
+                    <div className="flex-1 pr-2">
+                      <p className="font-semibold text-gray-800 line-clamp-1">
                         {item.product?.title || item.title || "Product"}
                       </p>
-                      <p className="text-gray-500">Qty: {item.quantity}</p>
+                      <p className="text-gray-500 text-[11px] sm:text-xs">Qty: {item.quantity}</p>
                     </div>
                     <span className="font-semibold text-gray-900">
                       ৳ {item.subtotal}
@@ -339,34 +350,36 @@ if (!formattedPhone) {
                 ))}
               </div>
 
-              <div className="space-y-4 mb-6 pt-2">
+              {/* Price Calculations */}
+              <div className="space-y-2.5 sm:space-y-4 mb-4 sm:mb-6 text-xs sm:text-sm pt-1">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>
-                  <span className="font-medium text-gray-900">
+                  <span className="font-semibold text-gray-900">
                     ৳ {subtotal.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Delivery Charge</span>
-                  <span className="font-medium text-gray-900">
+                  <span className="font-semibold text-gray-900">
                     ৳ {deliveryCharge.toFixed(2)}
                   </span>
                 </div>
               </div>
 
-              <div className="border-t border-gray-100 pt-4 mb-6">
+              <div className="border-t border-gray-100 pt-3 sm:pt-4 mb-4 sm:mb-6">
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-bold text-gray-900">Total</span>
-                  <span className="text-2xl font-bold text-brand">
+                  <span className="text-base sm:text-lg font-bold text-gray-900">Total</span>
+                  <span className="text-xl sm:text-2xl font-extrabold text-brand">
                     ৳ {totalAmount.toFixed(2)}
                   </span>
                 </div>
               </div>
 
+              {/* Submit CTA */}
               <button
                 onClick={handlePlaceOrder}
                 disabled={isCheckingOut || isSuccessModalOpen}
-                className="w-full bg-brand text-white font-semibold py-4 rounded-xl hover:bg-brand/90 transition shadow-lg shadow-brand/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="w-full bg-brand text-white font-semibold py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-sm sm:text-base hover:bg-brand/90 transition shadow-md shadow-brand/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-[0.99]"
               >
                 {isCheckingOut
                   ? "Processing..."
@@ -374,6 +387,7 @@ if (!formattedPhone) {
               </button>
             </div>
           </div>
+
         </div>
       </div>
     </section>
