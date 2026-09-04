@@ -43,7 +43,7 @@ const AdminSidebar = () => {
     <aside className="w-64 bg-white border-r border-slate-200 text-slate-600 min-h-screen flex flex-col justify-between p-4 select-none">
       <div className="space-y-6">
         {/* Brand Header */}
-        <div className="flex items-center gap-3 px-3 py-2">
+        <Link to={"/admin/dashboard"} className="flex items-center gap-3 px-3 py-2">
           <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20 text-lg">
             M
           </div>
@@ -55,7 +55,7 @@ const AdminSidebar = () => {
               Control Center
             </p>
           </div>
-        </div>
+        </Link>
 
         {/* Navigation Section */}
         <div>
