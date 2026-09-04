@@ -9,11 +9,55 @@ import Loading from "../../components/ui/Loading";
 import DeleteConfirmModal from "../../components/ui/DeleteConfirmModal";
 import { toast } from "react-toastify";
 
+// --- Inline Icons for clean aesthetic ---
+const PlusIcon = () => (
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+  </svg>
+);
+
+const SearchIcon = () => (
+  <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+  </svg>
+);
+
+const EditIcon = () => (
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+  </svg>
+);
+
+const TrashIcon = () => (
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+  </svg>
+);
+
+const ImageIcon = () => (
+  <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+  </svg>
+);
+
+const UploadIcon = () => (
+  <svg className="w-6 h-6 text-slate-400 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+  </svg>
+);
+
+const XIcon = () => (
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+  </svg>
+);
+
 const AdminCategories = () => {
   // Modal & Edit State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Form Fields State
   const initialFormState = {
@@ -31,10 +75,22 @@ const AdminCategories = () => {
   const [updateCategory, { isLoading: isUpdating }] = useUpdateCategoryMutation();
   const [deleteCategory, { isLoading: isDeleting }] = useDeleteCategoryMutation();
 
-  // Handle nested array response if backend returns an object wrapper
+  // Extract category list
   const categoryList = Array.isArray(data)
     ? data
     : data?.categories || data?.data || [];
+
+  // Filtered categories based on search input
+  const filteredCategories = categoryList.filter(
+    (cat) =>
+      cat.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cat.slug?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Quick stats calculations
+  const totalCategories = categoryList.length;
+  const activeCategories = categoryList.filter((c) => c.isActive !== false).length;
+  const inactiveCategories = totalCategories - activeCategories;
 
   // Form Handlers
   const handleInputChange = (e) => {
@@ -44,7 +100,6 @@ const AdminCategories = () => {
       [name]: type === "checkbox" ? checked : value,
     }));
 
-    // Auto-generate slug when creating a new category
     if (name === "title" && !editingCategoryId) {
       const generatedSlug = value
         .toLowerCase()
@@ -60,6 +115,11 @@ const AdminCategories = () => {
       setThumbnail(file);
       setThumbnailPreview(URL.createObjectURL(file));
     }
+  };
+
+  const removeSelectedImage = () => {
+    setThumbnail(null);
+    setThumbnailPreview(editingCategoryId ? categoryList.find(c => c._id === editingCategoryId)?.thumbnail || "" : "");
   };
 
   const resetForm = () => {
@@ -81,7 +141,7 @@ const AdminCategories = () => {
     setIsModalOpen(true);
   };
 
-  // Submit Handler for Create & Update
+  // Submit Handler
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -115,7 +175,7 @@ const AdminCategories = () => {
     }
   };
 
-  // Delete Handler via Reusable Modal
+  // Delete Handler
   const handleConfirmDelete = async () => {
     if (!categoryToDelete) return;
 
@@ -129,91 +189,150 @@ const AdminCategories = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header Bar */}
-      <div className="flex justify-between items-center">
+    <div className="max-w-7xl mx-auto space-y-6 p-4 sm:p-6 lg:p-8 font-sans text-slate-800">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Categories</h1>
-          <p className="text-sm text-gray-500">Organize and structure storefront items</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Categories</h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Manage storefront hierarchy, media thumbnails, and visibility states.
+          </p>
         </div>
         <button
           onClick={() => {
             resetForm();
             setIsModalOpen(true);
           }}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2.5 rounded-lg text-sm transition-colors shadow-sm"
+          className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-all shadow-sm shadow-indigo-200 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none"
         >
-          + Add Category
+          <PlusIcon />
+          <span>Add Category</span>
         </button>
       </div>
 
-      {/* Categories Table */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      {/* Quick Metrics Bar */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Total</span>
+          <span className="text-xl font-bold text-slate-900">{totalCategories}</span>
+        </div>
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+          <span className="text-xs font-semibold uppercase tracking-wider text-emerald-600">Active</span>
+          <span className="text-xl font-bold text-emerald-600">{activeCategories}</span>
+        </div>
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Disabled</span>
+          <span className="text-xl font-bold text-slate-500">{inactiveCategories}</span>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        {/* Search & Action Bar */}
+        <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="relative flex-1 max-w-xs">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <SearchIcon />
+            </div>
+            <input
+              type="text"
+              placeholder="Filter categories..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400"
+            />
+          </div>
+          <span className="text-xs font-medium text-slate-400">
+            Showing {filteredCategories.length} of {totalCategories} items
+          </span>
+        </div>
+
+        {/* Categories Table */}
         {isLoading ? (
-          <div className="p-8 flex justify-center">
+          <div className="p-12 flex justify-center items-center">
             <Loading />
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
-              <thead className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                <tr>
-                  <th className="py-3 px-4">Thumbnail</th>
-                  <th className="py-3 px-4">Title</th>
-                  <th className="py-3 px-4">Slug</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+              <thead>
+                <tr className="border-b border-slate-100 bg-slate-50/70 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  <th className="py-3.5 px-5">Thumbnail</th>
+                  <th className="py-3.5 px-5">Category Title</th>
+                  <th className="py-3.5 px-5">Slug</th>
+                  <th className="py-3.5 px-5">Status</th>
+                  <th className="py-3.5 px-5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 text-sm">
-                {categoryList.length === 0 ? (
+              <tbody className="divide-y divide-slate-100 text-sm">
+                {filteredCategories.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="text-center py-6 text-gray-500">
-                      No categories found.
+                    <td colSpan="5" className="text-center py-12 text-slate-400">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <ImageIcon />
+                        <p className="text-sm font-medium">No categories found matching your criteria.</p>
+                      </div>
                     </td>
                   </tr>
                 ) : (
-                  categoryList.map((cat) => (
-                    <tr key={cat._id} className="hover:bg-gray-50">
-                      <td className="py-3 px-4">
+                  filteredCategories.map((cat) => (
+                    <tr key={cat._id} className="hover:bg-slate-50/80 transition-colors group">
+                      <td className="py-3.5 px-5">
                         {cat.thumbnail ? (
-                          <img
-                            src={cat.thumbnail}
-                            alt={cat.title}
-                            className="w-10 h-10 rounded-lg object-cover border border-gray-200"
-                          />
+                          <div className="h-11 w-11 rounded-xl overflow-hidden border border-slate-200 bg-slate-50 flex-shrink-0">
+                            <img
+                              src={cat.thumbnail}
+                              alt={cat.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          </div>
                         ) : (
-                          <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-gray-400">
-                            N/A
+                          <div className="h-11 w-11 rounded-xl bg-slate-100 border border-slate-200/60 flex items-center justify-center flex-shrink-0">
+                            <ImageIcon />
                           </div>
                         )}
                       </td>
-                      <td className="py-3 px-4 font-medium text-gray-900">{cat.title}</td>
-                      <td className="py-3 px-4 text-gray-500 font-mono text-xs">{cat.slug}</td>
-                      <td className="py-3 px-4">
+                      <td className="py-3.5 px-5 font-semibold text-slate-800">
+                        {cat.title}
+                      </td>
+                      <td className="py-3.5 px-5">
+                        <span className="font-mono text-xs px-2 py-1 rounded-md bg-slate-100 text-slate-600 border border-slate-200/50">
+                          /{cat.slug}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-5">
                         <span
-                          className={`px-2.5 py-1 text-xs font-medium rounded-full ${
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full ${
                             cat.isActive !== false
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-100 text-gray-600"
+                              ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20"
+                              : "bg-slate-100 text-slate-500 ring-1 ring-slate-400/20"
                           }`}
                         >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              cat.isActive !== false ? "bg-emerald-500" : "bg-slate-400"
+                            }`}
+                          />
                           {cat.isActive !== false ? "Active" : "Disabled"}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-right space-x-2">
-                        <button
-                          onClick={() => handleEdit(cat)}
-                          className="text-blue-600 hover:underline font-medium text-xs"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => setCategoryToDelete(cat)}
-                          className="text-red-600 hover:underline font-medium text-xs"
-                        >
-                          Delete
-                        </button>
+                      <td className="py-3.5 px-5 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => handleEdit(cat)}
+                            className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                            title="Edit Category"
+                          >
+                            <EditIcon />
+                          </button>
+                          <button
+                            onClick={() => setCategoryToDelete(cat)}
+                            className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                            title="Delete Category"
+                          >
+                            <TrashIcon />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -226,10 +345,11 @@ const AdminCategories = () => {
 
       {/* CREATE / EDIT CATEGORY MODAL */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden animate-scaleUp">
-            <div className="p-5 border-b border-gray-200 flex justify-between items-center bg-white">
-              <h2 className="text-lg font-bold text-gray-800">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h2 className="text-base font-bold text-slate-900">
                 {editingCategoryId ? "Edit Category" : "Add New Category"}
               </h2>
               <button
@@ -237,16 +357,17 @@ const AdminCategories = () => {
                   setIsModalOpen(false);
                   resetForm();
                 }}
-                className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
               >
-                ✕
+                <XIcon />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            {/* Modal Form */}
+            <form onSubmit={handleSubmit} className="p-6 space-y-5">
               <div>
-                <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">
-                  Title *
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Category Title <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -254,77 +375,115 @@ const AdminCategories = () => {
                   required
                   value={formValues.title}
                   onChange={handleInputChange}
-                  placeholder="e.g. Footwear"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  placeholder="e.g. Footwear & Apparel"
+                  className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">
-                  Slug *
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                  URL Slug <span className="text-rose-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  name="slug"
-                  required
-                  value={formValues.slug}
-                  onChange={handleInputChange}
-                  placeholder="footwear"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
+                <div className="relative flex items-center">
+                  <span className="absolute left-3.5 text-sm text-slate-400 select-none">/</span>
+                  <input
+                    type="text"
+                    name="slug"
+                    required
+                    value={formValues.slug}
+                    onChange={handleInputChange}
+                    placeholder="footwear-apparel"
+                    className="w-full pl-7 pr-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-mono text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none transition-all"
+                  />
+                </div>
               </div>
 
+              {/* Upload Dropzone */}
               <div>
-                <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                   Thumbnail Image {editingCategoryId ? "(Optional)" : "*"}
                 </label>
-                {thumbnailPreview && (
-                  <div className="mb-2 flex items-center gap-3">
-                    <img
-                      src={thumbnailPreview}
-                      alt="Preview"
-                      className="w-12 h-12 rounded-lg object-cover border border-gray-200"
-                    />
-                    <span className="text-xs text-gray-500">Current Preview</span>
+
+                {thumbnailPreview ? (
+                  <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-50 p-2 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={thumbnailPreview}
+                        alt="Preview"
+                        className="w-12 h-12 rounded-lg object-cover border border-slate-200"
+                      />
+                      <div className="text-xs">
+                        <p className="font-medium text-slate-700">Selected Image</p>
+                        <p className="text-slate-400">{thumbnail ? thumbnail.name : "Existing Category Icon"}</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={removeSelectedImage}
+                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                      title="Clear image"
+                    >
+                      <XIcon />
+                    </button>
                   </div>
+                ) : (
+                  <label className="relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50/30 transition-all cursor-pointer group">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <UploadIcon />
+                      <p className="mt-2 text-xs font-medium text-slate-600">
+                        <span className="text-indigo-600 font-semibold">Click to upload</span> or drag and drop
+                      </p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">PNG, JPG or WEBP up to 5MB</p>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
                 )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                />
               </div>
 
-              <div className="flex items-center gap-2 pt-2">
-                <input
-                  type="checkbox"
-                  id="isActive"
-                  name="isActive"
-                  checked={formValues.isActive}
-                  onChange={handleInputChange}
-                  className="rounded text-blue-600 focus:ring-blue-500 h-4 w-4"
-                />
-                <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
-                  Enable Category (Active)
-                </label>
+              {/* Toggle Switch */}
+              <div className="flex items-center justify-between pt-2">
+                <div>
+                  <label className="text-sm font-semibold text-slate-800 block">Category Status</label>
+                  <p className="text-xs text-slate-500">Enable to display on storefront</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFormValues((prev) => ({ ...prev, isActive: !prev.isActive }))
+                  }
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500/20 ${
+                    formValues.isActive ? "bg-emerald-500" : "bg-slate-200"
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
+                      formValues.isActive ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </button>
               </div>
 
-              <div className="pt-4 border-t border-gray-200 flex justify-end gap-3">
+              {/* Actions Footer */}
+              <div className="pt-4 border-t border-slate-100 flex justify-end gap-2.5">
                 <button
                   type="button"
                   onClick={() => {
                     setIsModalOpen(false);
                     resetForm();
                   }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50"
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isCreating || isUpdating}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-xs font-medium transition-colors"
+                  className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl text-xs font-semibold shadow-xs shadow-indigo-200 transition-colors"
                 >
                   {editingCategoryId
                     ? isUpdating
