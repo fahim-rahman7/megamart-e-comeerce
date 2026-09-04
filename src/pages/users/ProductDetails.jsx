@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import Slider from "react-slick";
-import { useGetProductDetailsQuery, useAddToCartMutation } from "../service/api";
+import { useGetProductDetailsQuery, useAddToCartMutation } from "../../service/api";
 import { useParams, useNavigate } from "react-router";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { FiShoppingBag, FiCheck, FiShield, FiTruck, FiRefreshCw, FiZap } from "react-icons/fi";
-import ProductDetailsLoading from "../components/ui/ProductDetailsLoading";
+import ProductDetailsLoading from "../../components/ui/ProductDetailsLoading";
 
 const ProductDetails = () => {
   const sliderRef1 = useRef(null);

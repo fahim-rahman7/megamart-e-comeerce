@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router";
-import Input from "../components/ui/Input";
-import { useVerifyEmailMutation, useResendOtpMutation } from "../service/api";
+import Input from "../../components/ui/Input";
+import { useVerifyEmailMutation, useResendOtpMutation } from "../../service/api";
 
 const VerifyEmail = () => {
   const location = useLocation();

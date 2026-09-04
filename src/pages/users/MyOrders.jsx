@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router"; // or "react-router-dom"
-import { useGetMyOrdersQuery } from "../service/api";
-import Loader from "../components/ui/LoadAnime";
+import { useGetMyOrdersQuery } from "../../service/api";
+import Loader from "../../components/ui/LoadAnime";
 import { 
   FiArrowLeft, FiPackage, FiMapPin, FiCreditCard, 
   FiCalendar, FiClock, FiCheckCircle, FiTruck, FiXCircle

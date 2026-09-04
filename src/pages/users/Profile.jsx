@@ -5,8 +5,8 @@ import {
   useUpdateProfileMutation,
   useGetCartQuery,
   useGetMyOrdersQuery,
-} from "../service/api";
-import Loader from "../components/ui/LoadAnime";
+} from "../../service/api";
+import Loader from "../../components/ui/LoadAnime";
 import {
   FiEdit3,
   FiSave,
@@ -21,7 +21,8 @@ import {
   FiTruck,
   FiCheckCircle,
   FiClock,
-  FiPhone, // Added FiPhone icon
+  FiPhone,
+  FiGrid, // Added FiGrid icon for Admin Dashboard button
 } from "react-icons/fi";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -41,7 +42,7 @@ const Profile = () => {
   // Local States for Editing
   const [isEditing, setIsEditing] = useState(false);
   const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState(""); // Added phone state
+  const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState("");
@@ -62,7 +63,7 @@ const Profile = () => {
   useEffect(() => {
     if (profileData) {
       setFullName(profileData.fullName || "");
-      setPhone(profileData.phone || ""); // Populate phone state
+      setPhone(profileData.phone || "");
       setAddress(
         typeof profileData.address === "string"
           ? profileData.address
@@ -87,7 +88,7 @@ const Profile = () => {
     e.preventDefault();
     const formData = new FormData();
     formData.append("fullName", fullName);
-    formData.append("phone", phone); // Append phone to form data
+    formData.append("phone", phone);
     formData.append("address", address);
     if (avatarFile) {
       formData.append("avatar", avatarFile);
@@ -107,7 +108,7 @@ const Profile = () => {
   const handleCancel = () => {
     setIsEditing(false);
     setFullName(profileData.fullName || "");
-    setPhone(profileData.phone || ""); // Reset phone state on cancel
+    setPhone(profileData.phone || "");
     setAddress(
       typeof profileData.address === "string"
         ? profileData.address
@@ -180,7 +181,18 @@ const Profile = () => {
             </div>
           </div>
 
-          <div>
+          {/* Action Buttons */}
+          <div className="flex flex-wrap items-center justify-center md:justify-end gap-3">
+            {/* Conditional Admin Dashboard Button */}
+            {profileData.role === "admin" && (
+              <Link
+                to="/admin/dashboard"
+                className="flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-xl font-semibold shadow-sm hover:bg-gray-800 transition cursor-pointer"
+              >
+                <FiGrid /> Admin Dashboard
+              </Link>
+            )}
+
             {!isEditing ? (
               <button
                 onClick={() => setIsEditing(true)}
@@ -300,7 +312,7 @@ const Profile = () => {
                     </span>
                   </div>
                 </div>
-                
+
                 {/* --- PHONE NUMBER INPUT BLOCK --- */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1">

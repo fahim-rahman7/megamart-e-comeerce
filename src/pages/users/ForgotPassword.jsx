@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router";
-import Input from "../components/ui/Input";
-import { useForgetPasswordMutation } from "../service/api";
+import Input from "../../components/ui/Input";
+import { useForgetPasswordMutation } from "../../service/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 

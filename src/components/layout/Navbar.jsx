@@ -3,7 +3,7 @@ import { CiSearch, CiShoppingCart } from "react-icons/ci";
 import { FaBars, FaRegUser, FaWindowClose } from "react-icons/fa";
 import { Link, useNavigate, useSearchParams } from "react-router"; // Added useSearchParams
 import { useGetCategoryListQuery, useGetProfileQuery } from "../../service/api";
-import Logout from "../../pages/Logout";
+import Logout from "../../pages/users/Logout";
 
 const Navbar = () => {
   const [openDropDown, setOpenDropDown] = useState("");

@@ -1,17 +1,16 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { useDispatch } from "react-redux"; // 1. Import useDispatch
-import Input from "../components/ui/Input";
+import { useDispatch } from "react-redux";
+import Input from "../../components/ui/Input";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
-import { useLoginMutation, API } from "../service/api";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { useLoginMutation, API } from "../../service/api";
+import { toast } from "react-toastify";
 
 const LogIn = () => {
   const [login, { isLoading }] = useLoginMutation();
   const [passToggle, setPassToggle] = useState(false);
   const navigate = useNavigate();
-  const dispatch = useDispatch(); // 3. Initialize dispatch
+  const dispatch = useDispatch();
 
   const [loginData, setLoginData] = useState({
     email: "",
@@ -32,67 +31,39 @@ const LogIn = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFieldErrors({});
-
+  
     try {
       const res = await login(loginData).unwrap();
-      // Step A: Save token synchronously FIRST
-      if (res?.accToken) {
-        localStorage.setItem("acc_tkn", res.accToken);
-      }
-
-      // Step B: Now tell RTK Query to fetch Profile & Cart (token is guaranteed in localStorage)
-      dispatch(API.util.invalidateTags(["Profile", "Cart"]));
-
-      toast.success(res.message || "Logged in successfully!");
-
-
-        navigate("/profile");
-
-    } catch (err) {
-      const errorMsg = err?.data?.message || "Login failed. Please try again.";
-      const lowerMsg = errorMsg.toLowerCase();
-
-      // Check for specific input field validation errors
-      const isEmailRequired =
-        lowerMsg.includes("email is required") ||
-        lowerMsg.includes("email required");
-      const isEmailInvalid =
-        lowerMsg.includes("email is not valid") ||
-        lowerMsg.includes("email not valid");
-      const isPasswordRequired =
-        lowerMsg.includes("password is required") ||
-        lowerMsg.includes("password required");
-
-      const isFieldError =
-        isEmailRequired || isEmailInvalid || isPasswordRequired;
-
-      if (isFieldError) {
-        // Show ONLY inline field errors (No Toastify)
-        const errors = {};
-        if (isEmailRequired || isEmailInvalid) {
-          errors.email = errorMsg;
-        }
-        if (isPasswordRequired) {
-          errors.password = errorMsg;
-        }
-        setFieldErrors(errors);
+      
+      // 1. Extract token safely
+      const token = res?.accToken || res?.token;
+  
+      if (token) {
+        localStorage.setItem("acc_tkn", token);
       } else {
-        // Show ONLY Toastify for global/auth errors (Invalid credentials, Email not verified, Server errors)
-        toast.error(errorMsg);
-
-        if (lowerMsg.includes("not verified")) {
-          setTimeout(() => {
-            navigate("/verify-email", { state: { email: loginData.email } });
-          }, 1500);
-        }
+        console.error("No token received from backend:", res);
+        return;
       }
+  
+      // 2. Refresh RTK Query profile state with the new token
+      dispatch(API.util.invalidateTags(["Profile", "Cart"]));
+  
+      toast.success(res.message || "Logged in successfully!");
+  
+      // 3. Route check using backend response role
+      const userRole = (res?.user?.role || "").toLowerCase();
+      if (userRole === "admin" || userRole === "moderator") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/profile");
+      }
+    } catch (err) {
+      toast.error(err?.data?.message || "Login failed");
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen dark">
-      <ToastContainer position="top-right" autoClose={3000} />
-
       <div className="w-full max-w-md bg-theme rounded-xl shadow-xl p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Log In</h2>
 

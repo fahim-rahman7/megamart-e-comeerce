@@ -54,12 +54,12 @@ const ProductCard = ({ data }) => {
         <div className="mt-2 pt-2 border-t border-gray-100">
           <div className="flex items-baseline gap-1.5 flex-wrap">
             <p className="font-bold text-sm sm:text-base text-gray-900">
-              ₹{currentPrice}
+            ৳{currentPrice}
             </p>
             
             {regularPrice > currentPrice && (
               <p className="line-through text-xs text-gray-400">
-                ₹{regularPrice}
+                ৳{regularPrice}
               </p>
             )}
           </div>
@@ -67,7 +67,7 @@ const ProductCard = ({ data }) => {
           {/* Savings */}
           {savings > 0 ? (
             <p className="text-emerald-600 text-[11px] sm:text-xs font-semibold mt-1">
-              Save ₹{savings}
+              Save ৳{savings}
             </p>
           ) : (
             <p className="text-transparent text-[11px] sm:text-xs mt-1 select-none">

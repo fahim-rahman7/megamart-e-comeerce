@@ -6,9 +6,9 @@ import {
   useDirectCheckoutMutation,
   useRemoveFromCartMutation,
   useGetProfileQuery,
-} from "../service/api";
+} from "../../service/api";
 import { ToastContainer, toast } from "react-toastify";
-import OrderSuccessModal from "../components/ui/OrderSuccessModal";
+import OrderSuccessModal from "../../components/ui/OrderSuccessModal";
 
 const Order = () => {
   const navigate = useNavigate();

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router";
-import Input from "../components/ui/Input";
+import Input from "../../components/ui/Input";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
-import { useResetPasswordMutation } from "../service/api";
+import { useResetPasswordMutation } from "../../service/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 

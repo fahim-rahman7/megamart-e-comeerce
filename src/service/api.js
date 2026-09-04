@@ -1,179 +1,209 @@
-import {
-  createApi,
-  fetchBaseQuery
-} from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const API = createApi({
-  reducerPath: 'api',
+  reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001',
-    credentials: 'include',
-    // Attaches stored token to every request header
+    baseUrl: import.meta.env.VITE_API_BASE_URL || "http://localhost:3001",
+    credentials: "include",
     prepareHeaders: (headers) => {
-      const token = localStorage.getItem('acc_tkn');
+      const token = localStorage.getItem("acc_tkn");
       if (token) {
-        headers.set('authorization', `Bearer ${token}`);
+        headers.set("authorization", `Bearer ${token}`);
       }
       return headers;
     },
   }),
-  tagTypes: ['Product', 'Category', 'Cart', 'Profile', 'Order'],
+  tagTypes: ["Product", "Category", "Cart", "Profile", "Order", "User", "Analytics"],
   endpoints: (build) => ({
+    // =========================================================================
+    // 1. ADMIN DASHBOARD & MANAGEMENT ENDPOINTS
+    // =========================================================================
+
+    // GET /admin/analytics
+    getDashboardStats: build.query({
+      query: () => "/admin/analytics",
+      providesTags: ["Analytics"],
+    }),
+
+// GET /admin/users
+getUserList: build.query({
+  query: ({ limit = 10, page = 1, role, verified } = {}) => ({
+    url: "/admin/users",
+    params: {
+      limit,
+      page,
+      ...(role && role !== "all" && { role }),
+      ...(verified && verified !== "all" && { verified }),
+    },
+  }),
+  providesTags: ["User"],
+}),
+
+    // PATCH /admin/user/role/:id
+    updateUserRole: build.mutation({
+      query: ({ id, role }) => ({
+        url: `/admin/user/role/${id}`,
+        method: "PATCH",
+        body: { role },
+      }),
+      invalidatesTags: ["User"],
+    }),
+
+    // GET /admin/carts
+    getAllCartsAdmin: build.query({
+      query: () => "/admin/carts",
+      providesTags: ["Cart"],
+    }),
+
+// GET /admin/orders (Admin)
+getAllOrdersAdmin: build.query({
+  query: ({ page = 1, limit = 10, status } = {}) => ({
+    url: "/admin/orders",
+    params: {
+      page,
+      limit,
+      ...(status && { status }),
+    },
+  }),
+  providesTags: ["Order"],
+}),
+
+    // PATCH /admin/order/status/:id
+    updateOrderStatus: build.mutation({
+      query: ({ id, status }) => ({
+        url: `/admin/order/status/${id}`,
+        method: "PATCH",
+        body: { status },
+      }),
+      invalidatesTags: ["Order", "Analytics"],
+    }),
 
     // =========================================================================
-    // 1. PRODUCTS ENDPOINTS
+    // 2. PRODUCTS ENDPOINTS (STOREFRONT + ADMIN)
     // =========================================================================
 
-    // GET /product/allProduct
+    // GET /product/allProduct (Public Storefront)
     getProducts: build.query({
-      query: ({
-        limit = 10,
-        page = 1,
-        category,
-        search,
-        hasDiscount
-      } = {}) => {
+      query: ({ limit = 10, page = 1, category, search, hasDiscount } = {}) => {
         let url = `/product/allProduct?limit=${limit}&page=${page}`;
         if (category) url += `&category=${encodeURIComponent(category)}`;
         if (search) url += `&search=${encodeURIComponent(search)}`;
         if (hasDiscount) url += `&hasDiscount=true`;
         return url;
       },
-      providesTags: ['Product'],
+      providesTags: ["Product"],
     }),
 
-    // GET /product/:slug
+    // GET /product/:slug (Public Storefront)
     getProductDetails: build.query({
       query: (slug) => `/product/${slug}`,
-      providesTags: (result, error, slug) => [{
-        type: 'Product',
-        id: slug
-      }],
+      providesTags: (result, error, slug) => [{ type: "Product", id: slug }],
     }),
 
-    // POST /product/create (Multipart Form Data)
+    // POST /admin/product/create (Admin - Multipart)
     createProduct: build.mutation({
       query: (formData) => ({
-        url: '/product/create',
-        method: 'POST',
+        url: "/admin/product/create",
+        method: "POST",
         body: formData,
       }),
-      invalidatesTags: ['Product'],
+      invalidatesTags: ["Product", "Analytics"],
     }),
 
-    // PUT /product/update/:slug (Multipart Form Data)
+    // PUT /admin/product/update/:slug (Admin - Multipart)
     updateProduct: build.mutation({
-      query: ({
-        slug,
-        formData
-      }) => ({
-        url: `/product/update/${slug}`,
-        method: 'PUT',
+      query: ({ id, formData }) => ({
+        url: `/admin/product/update/${id}`,
+        method: "PUT",
         body: formData,
       }),
-      invalidatesTags: (result, error, {
-        slug
-      }) => ['Product', {
-        type: 'Product',
-        id: slug
-      }],
+      invalidatesTags: (result, error, { id }) => [
+        "Product",
+        { type: "Product", id },
+      ],
+    }),
+
+    // DELETE /admin/product/delete/:id (Admin)
+    deleteProduct: build.mutation({
+      query: (id) => ({
+        url: `/admin/product/delete/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Product", "Analytics"],
     }),
 
     // =========================================================================
-    // 2. CATEGORY ENDPOINTS
+    // 3. CATEGORY ENDPOINTS (STOREFRONT + ADMIN)
     // =========================================================================
 
-    // GET /category/all
+    // GET /category/all (Public Storefront)
     getCategoryList: build.query({
-      query: () => '/category/all',
-      providesTags: ['Category'],
+      query: () => "/category/all",
+      providesTags: ["Category"],
     }),
 
-    // POST /category/create (Multipart Form Data)
+    // POST /admin/category/create (Admin - Multipart)
     createCategory: build.mutation({
       query: (categoryData) => ({
-        url: '/category/create',
-        method: 'POST',
+        url: "/admin/category/create",
+        method: "POST",
         body: categoryData,
       }),
-      invalidatesTags: ['Category'],
+      invalidatesTags: ["Category", "Analytics"],
     }),
 
-    // PATCH /category/update/:id (Multipart Form Data)
+    // PATCH /admin/category/update/:id (Admin - Multipart)
     updateCategory: build.mutation({
-      query: ({
-        id,
-        formData
-      }) => ({
-        url: `/category/update/${id}`,
-        method: 'PATCH',
+      query: ({ id, formData }) => ({
+        url: `/admin/category/update/${id}`,
+        method: "PATCH",
         body: formData,
       }),
-      invalidatesTags: ['Category'],
+      invalidatesTags: ["Category"],
     }),
 
-    // DELETE /category/delete/:id
+    // DELETE /admin/category/delete/:id (Admin)
     deleteCategory: build.mutation({
       query: (id) => ({
-        url: `/category/delete/${id}`,
-        method: 'DELETE',
+        url: `/admin/category/delete/${id}`,
+        method: "DELETE",
       }),
-      invalidatesTags: ['Category'],
+      invalidatesTags: ["Category", "Analytics"],
     }),
 
     // =========================================================================
-    // 3. CART ENDPOINTS
+    // 4. CART ENDPOINTS
     // =========================================================================
 
-    // GET /cart/userCart
     getCart: build.query({
-      query: () => '/cart/userCart',
-      providesTags: ['Cart'],
+      query: () => "/cart/userCart",
+      providesTags: ["Cart"],
     }),
 
-    // POST /cart/add
     addToCart: build.mutation({
       query: (cartData) => ({
-        url: '/cart/add',
-        method: 'POST',
+        url: "/cart/add",
+        method: "POST",
         body: cartData,
       }),
-      invalidatesTags: ['Cart'],
+      invalidatesTags: ["Cart"],
     }),
 
-    // PUT /cart/updateCart
     updateCart: build.mutation({
       query: (cartData) => ({
-        url: '/cart/updateCart',
-        method: 'PUT',
+        url: "/cart/updateCart",
+        method: "PUT",
         body: cartData,
       }),
-      // Keep this so the app guarantees full synchronization with the backend eventually
-      invalidatesTags: ['Cart'],
-
-      // Add this Optimistic Update logic
-      async onQueryStarted({
-        itemId,
-        quantity
-      }, {
-        dispatch,
-        queryFulfilled
-      }) {
-        // 1. Dispatch an update to the cached 'getCart' data instantly
+      invalidatesTags: ["Cart"],
+      async onQueryStarted({ itemId, quantity }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
-          API.util.updateQueryData('getCart', undefined, (draft) => {
-            // Find the specific item in our cached cart draft
+          API.util.updateQueryData("getCart", undefined, (draft) => {
             const item = draft.cartData?.items?.find((i) => i._id === itemId);
-
             if (item) {
-              // Calculate the unit price based on existing subtotal & quantity
               const unitPrice = item.subtotal / item.quantity;
-
-              // Apply the new quantity and recalculate subtotal instantly
               item.quantity = quantity;
               item.subtotal = unitPrice * quantity;
-
-              // Recalculate total items across the whole cart
               if (draft.cartData?.items) {
                 draft.cartData.totalItems = draft.cartData.items.reduce(
                   (acc, i) => acc + i.quantity,
@@ -183,173 +213,143 @@ export const API = createApi({
             }
           })
         );
-
         try {
-          // 2. Wait for the actual backend PUT request to complete
           await queryFulfilled;
         } catch {
-          // 3. If the backend request fails for any reason, revert the UI instantly
           patchResult.undo();
         }
       },
     }),
 
-    // DELETE /cart/deleteCart
     removeFromCart: build.mutation({
       query: (cartData) => ({
-        url: '/cart/deleteCart',
-        method: 'DELETE',
+        url: "/cart/deleteCart",
+        method: "DELETE",
         body: cartData,
       }),
-      invalidatesTags: ['Cart'],
+      invalidatesTags: ["Cart"],
     }),
 
     // =========================================================================
-    // 4. ORDER & CHECKOUT ENDPOINTS
+    // 5. ORDER & CHECKOUT ENDPOINTS
     // =========================================================================
 
-// POST /order/checkout/cart (Checkout using stored Cart)
-cartCheckout: build.mutation({
-  query: (orderData) => ({
-    url: '/order/checkout/cart',
-    method: 'POST',
-    body: orderData,
-  }),
-  invalidatesTags: ['Cart', 'Order'], // Clears cart cache and refreshes user orders
-}),
+    cartCheckout: build.mutation({
+      query: (orderData) => ({
+        url: "/order/checkout/cart",
+        method: "POST",
+        body: orderData,
+      }),
+      invalidatesTags: ["Cart", "Order", "Analytics"],
+    }),
 
-// POST /order/checkout/direct (Immediate Buy-Now flow)
-directCheckout: build.mutation({
-  query: (orderData) => ({
-    url: '/order/checkout/direct',
-    method: 'POST',
-    body: orderData,
-  }),
-  invalidatesTags: ['Order'], // Refreshes user order history
-}),
+    directCheckout: build.mutation({
+      query: (orderData) => ({
+        url: "/order/checkout/direct",
+        method: "POST",
+        body: orderData,
+      }),
+      invalidatesTags: ["Order", "Analytics"],
+    }),
 
-// GET /order/myorders
-getMyOrders: build.query({
-  query: () => '/order/myorders',
-  providesTags: ['Order'],
-}),
+    getMyOrders: build.query({
+      query: () => "/order/myorders",
+      providesTags: ["Order"],
+    }),
+
     // =========================================================================
-    // 5. AUTHENTICATION & PROFILE ENDPOINTS
+    // 6. AUTHENTICATION & PROFILE ENDPOINTS
     // =========================================================================
 
-    // POST /auth/signin
     login: build.mutation({
       query: (userData) => ({
-        url: '/auth/signin',
-        method: 'POST',
+        url: "/auth/signin",
+        method: "POST",
         body: userData,
       }),
-      // Saves token to localStorage automatically when login succeeds
-      async onQueryStarted(args, {
-        queryFulfilled
-      }) {
+      async onQueryStarted(args, { queryFulfilled }) {
         try {
-          const {
-            data
-          } = await queryFulfilled;
+          const { data } = await queryFulfilled;
           if (data?.accToken) {
-            localStorage.setItem('acc_tkn', data.accToken);
+            localStorage.setItem("acc_tkn", data.accToken);
           }
         } catch (error) {
           console.error("Login failed:", error);
         }
       },
-      // invalidatesTags: ['Profile', 'Cart'],
     }),
 
-    // POST /auth/signup
     signUp: build.mutation({
       query: (userData) => ({
-        url: '/auth/signup',
-        method: 'POST',
+        url: "/auth/signup",
+        method: "POST",
         body: userData,
       }),
     }),
 
-    // POST /auth/verify-email
     verifyEmail: build.mutation({
       query: (otpData) => ({
-        url: '/auth/verify-email',
-        method: 'POST',
+        url: "/auth/verify-email",
+        method: "POST",
         body: otpData,
       }),
     }),
 
-    // POST /auth/resend-otp
     resendOtp: build.mutation({
       query: (emailData) => ({
-        url: '/auth/resend-otp',
-        method: 'POST',
+        url: "/auth/resend-otp",
+        method: "POST",
         body: emailData,
       }),
     }),
 
-    // POST /auth/forget-pass
     forgetPassword: build.mutation({
       query: (emailData) => ({
-        url: '/auth/forget-pass',
-        method: 'POST',
+        url: "/auth/forget-pass",
+        method: "POST",
         body: emailData,
       }),
     }),
 
-    // POST /auth/reset-pass/:token
     resetPassword: build.mutation({
-      query: ({
-        token,
-        newPass
-      }) => ({
+      query: ({ token, newPass }) => ({
         url: `/auth/reset-pass/${token}`,
-        method: 'POST',
-        body: {
-          newPass
-        },
+        method: "POST",
+        body: { newPass },
       }),
     }),
 
-    // GET /auth/getprofile
     getProfile: build.query({
-      query: () => '/auth/getprofile',
-      providesTags: ['Profile'],
+      query: () => "/auth/getprofile",
+      providesTags: ["Profile"],
     }),
 
-    // PUT /auth/updateprofile (Multipart Form Data for Avatar)
     updateProfile: build.mutation({
       query: (formData) => ({
-        url: '/auth/updateprofile',
-        method: 'PUT',
+        url: "/auth/updateprofile",
+        method: "PUT",
         body: formData,
       }),
-      invalidatesTags: ['Profile'],
-    }),
-
-    // GET /auth/userlist (Admin/Moderator)
-    getUserList: build.query({
-      query: ({
-        verified,
-        limit = 10,
-        page = 1
-      } = {}) => {
-        let url = `/auth/userlist?limit=${limit}&page=${page}`;
-        if (verified !== undefined) url += `&verified=${verified}`;
-        return url;
-      },
+      invalidatesTags: ["Profile"],
     }),
   }),
 });
 
-// Auto-generated hooks for components
 export const {
+  // Admin Hooks
+  useGetDashboardStatsQuery,
+  useGetUserListQuery,
+  useUpdateUserRoleMutation,
+  useGetAllCartsAdminQuery,
+  useGetAllOrdersAdminQuery,
+  useUpdateOrderStatusMutation,
+
   // Products Hooks
   useGetProductsQuery,
   useGetProductDetailsQuery,
   useCreateProductMutation,
   useUpdateProductMutation,
+  useDeleteProductMutation,
 
   // Category Hooks
   useGetCategoryListQuery,
@@ -367,6 +367,7 @@ export const {
   useDirectCheckoutMutation,
   useCartCheckoutMutation,
   useGetMyOrdersQuery,
+
   // Auth Hooks
   useLoginMutation,
   useSignUpMutation,
@@ -376,5 +377,4 @@ export const {
   useResetPasswordMutation,
   useGetProfileQuery,
   useUpdateProfileMutation,
-  useGetUserListQuery,
 } = API;

@@ -1,8 +1,8 @@
 import React from "react";
 import { Link } from "react-router";
-import { useGetCartQuery } from "../service/api";
+import { useGetCartQuery } from "../../service/api";
 import { FiShoppingBag, FiArrowRight } from "react-icons/fi";
-import CartItem from "../components/ui/CartItem";
+import CartItem from "../../components/ui/CartItem";
 
 const Cart = () => {
   const { data, isLoading } = useGetCartQuery();

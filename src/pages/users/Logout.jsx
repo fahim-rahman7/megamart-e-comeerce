@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router";
 import { useDispatch } from "react-redux";
-import { API } from "../service/api";
+import { API } from "../../service/api";
 import { toast } from "react-toastify";
 
 const Logout = ({ className }) => {
