@@ -27,7 +27,7 @@ import AdminOrders from "./pages/admin/AdminOrders";
 // Toast Notifications
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import AdminUsers from "./pages/admin/adminUsers";
+import AdminUsers from "./pages/admin/AdminUsers";
 
 function App() {
   return (
